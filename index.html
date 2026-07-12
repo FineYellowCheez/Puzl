@@ -62,6 +62,10 @@
   --origami-dark: #0B7A85;
   --origami-tint: #DFF6F7;
 
+  --rulebook:      #3D4F91;
+  --rulebook-dark: #2C3A6B;
+  --rulebook-tint: #E7EAF5;
+
   --danger:     #E8503D;
   --danger-tint:#FDE7E4;
   --success:    #1FA971;
@@ -180,8 +184,14 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
 .game-title-text h1{ font-size:22px; line-height:1.1; }
 .game-title-text p{ font-size:12.5px; color:var(--ink-soft); }
 
-.lives{ display:flex; gap:4px; flex:0 0 auto; font-size:19px; letter-spacing:1px; }
+.lives{ display:flex; gap:5px; flex:0 0 auto; font-size:13px; letter-spacing:1px; }
 .lives .lost{ opacity:0.25; }
+
+.mistakes-wrap{ display:flex; flex-direction:column; align-items:center; gap:3px; flex:0 0 auto; }
+.mistakes-label{
+  font-family:'IBM Plex Mono', monospace; font-size:8.5px; text-transform:uppercase;
+  letter-spacing:0.5px; color:var(--ink-faint); white-space:nowrap;
+}
 
 .info-btn{
   flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:1px solid var(--line);
@@ -221,6 +231,17 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
   width:64px; height:64px; border-radius:var(--radius-md); margin:0 auto 16px; overflow:hidden;
 }
 .preview-icon svg{ width:100%; height:100%; display:block; }
+
+.preview-completed-note{
+  background:var(--bg); border-radius:var(--radius-sm); padding:9px 14px;
+  font-size:13px; color:var(--ink-soft); margin-bottom:4px;
+}
+
+/* fade + gentle pop entrance for the game preview popup specifically */
+#preview-modal{ opacity:0; transition:opacity 0.2s ease; }
+#preview-modal.visible{ opacity:1; }
+#preview-modal .modal-card{ transform:scale(0.96); transition:transform 0.2s ease; }
+#preview-modal.visible .modal-card{ transform:scale(1); }
 
 /* locked-panel: shown in place of gameplay once today's puzzle is done */
 .locked-panel{ text-align:center; padding:40px 16px 20px; margin-top:4px; }
@@ -661,6 +682,83 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
   background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
   padding:9px 14px; font-size:13.5px; color:var(--ink-soft); text-align:center;
 }
+
+/* =========================================================
+   RULEBOOK
+   ========================================================= */
+
+.rb-section-label{
+  font-family:'IBM Plex Mono', monospace; font-size:11.5px; text-transform:uppercase;
+  letter-spacing:0.8px; color:var(--ink-faint); margin:0 2px 10px;
+}
+.rb-counter{ font-weight:700; color:var(--rulebook-dark); }
+
+.rb-test-row{ display:flex; gap:10px; margin-bottom:10px; }
+.rb-test-input{
+  flex:1 1 auto; padding:13px 16px; border-radius:999px; border:2px solid var(--line);
+  font-size:15px; background:var(--surface); color:var(--ink);
+}
+.rb-test-input:focus{ outline:none; border-color:var(--rulebook); }
+.rb-test-input.invalid{ border-color:var(--danger); animation:input-shake 0.4s ease; }
+.rb-test-input:disabled{ opacity:0.5; }
+
+.rb-test-submit{
+  flex:0 0 auto; width:52px; height:52px; border-radius:50%; background:var(--rulebook); color:#fff;
+  font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm);
+}
+.rb-test-submit:hover{ background:var(--rulebook-dark); }
+.rb-test-submit:disabled{ opacity:0.5; cursor:default; }
+
+.rb-test-feedback{ min-height:20px; text-align:center; font-size:13.5px; margin-bottom:16px; }
+.rb-test-feedback.valid{ color:var(--success); font-weight:700; }
+.rb-test-feedback.invalidresult{ color:var(--danger); font-weight:700; }
+
+.rb-history{ display:flex; flex-direction:column; gap:8px; margin-bottom:24px; max-height:220px; overflow-y:auto; }
+.rb-history-empty{ text-align:center; color:var(--ink-faint); font-size:13px; }
+.rb-history-row{
+  display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius-sm); padding:9px 12px; font-size:13.5px;
+}
+.rb-history-row .sentence{ flex:1 1 auto; color:var(--ink); word-break:break-word; }
+.rb-history-tag{
+  flex:0 0 auto; font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase;
+  letter-spacing:0.5px; font-weight:700; padding:3px 9px; border-radius:999px;
+}
+.rb-history-tag.valid{ background:var(--deco-tint); color:var(--success); }
+.rb-history-tag.invalidresult{ background:var(--danger-tint); color:var(--danger); }
+
+.rb-divider{ border:none; border-top:1px solid var(--line); margin:4px 0 22px; }
+
+.rb-guess-row{ display:flex; gap:10px; margin-bottom:10px; }
+.rb-guess-input{
+  flex:1 1 auto; padding:13px 16px; border-radius:999px; border:2px solid var(--rulebook);
+  font-size:15px; background:var(--rulebook-tint); color:var(--ink);
+}
+.rb-guess-input:focus{ outline:none; border-color:var(--rulebook-dark); }
+.rb-guess-input:disabled{ opacity:0.5; background:var(--surface); border-color:var(--line); }
+
+.rb-guess-submit-row{ text-align:center; margin-bottom:14px; }
+.rb-guess-submit-btn{
+  padding:13px 28px; border-radius:999px; background:var(--rulebook); color:#fff; font-weight:700; font-size:14.5px;
+}
+.rb-guess-submit-btn:hover{ background:var(--rulebook-dark); }
+.rb-guess-submit-btn:disabled{ opacity:0.5; cursor:default; }
+
+.rb-confirm-box{
+  text-align:center; background:var(--rulebook-tint); border-radius:var(--radius-md);
+  padding:16px; margin-bottom:16px;
+}
+.rb-confirm-box p{ font-size:13.5px; color:var(--ink); margin-bottom:12px; line-height:1.45; }
+.rb-confirm-actions{ display:flex; gap:10px; justify-content:center; }
+
+.rb-reveal-box{
+  background:var(--rulebook-tint); border-radius:var(--radius-md); padding:16px; margin-top:auto; text-align:center;
+}
+.rb-reveal-box .label{
+  font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--rulebook-dark); margin-bottom:6px;
+}
+.rb-reveal-box .rule-text{ font-weight:700; color:var(--ink); font-size:14.5px; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -841,6 +939,25 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
           <div class="game-chevron">&rsaquo;</div>
         </button>
       </li>
+      <li>
+        <button class="game-card" data-preview="rulebook">
+          <div class="game-icon">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" fill="var(--rulebook)"/>
+              <rect x="13" y="9" width="22" height="30" rx="3" fill="#fff"/>
+              <rect x="17" y="16" width="14" height="3" rx="1.5" fill="var(--rulebook)"/>
+              <rect x="17" y="22" width="14" height="3" rx="1.5" fill="var(--rulebook)"/>
+              <rect x="17" y="28" width="9" height="3" rx="1.5" fill="var(--rulebook)"/>
+            </svg>
+          </div>
+          <div class="game-info">
+            <div class="game-name">Rulebook</div>
+            <div class="game-phrase">Find the secret rule by testing sentences.</div>
+            <span class="game-badge" id="badge-rulebook" data-category="Logic">Logic</span>
+          </div>
+          <div class="game-chevron">&rsaquo;</div>
+        </button>
+      </li>
     </ul>
 
     <p class="more-soon">More puzzles are on the way — check back soon.</p>
@@ -856,6 +973,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
     <div class="preview-icon" id="preview-icon"></div>
     <h2 id="preview-title">Game name</h2>
     <p id="preview-phrase">Short phrase</p>
+    <p class="preview-completed-note" id="preview-completed-note" hidden></p>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="preview-back-btn">Back</button>
       <button class="btn btn-primary" id="preview-play-btn">Play</button>
@@ -883,12 +1001,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
           <p>A visual logic puzzle about overlapping categories.</p>
         </div>
       </div>
-      <div class="lives mono" id="venn-lives" aria-label="Lives remaining">&hearts;&hearts;&hearts;</div>
+      <div class="mistakes-wrap">
+        <span class="mistakes-label">Mistakes</span>
+        <div class="lives mono" id="venn-lives" aria-label="Mistakes remaining">&#9679;&#9679;&#9679;</div>
+      </div>
       <button class="info-btn" id="venn-info-btn" aria-label="Show instructions">i</button>
     </div>
 
     <div class="instructions-box" id="venn-instructions-box">
-      <strong>How to play:</strong> Place all items into the correct part of the diagram. Missed items or wrong placements cost a life. You have 3 lives. You can play each day's puzzle once — a new one arrives at midnight.
+      <strong>How to play:</strong> Place all items into the correct part of the diagram. Missed items or wrong placements count as a mistake. You have 3 mistakes allowed. You can play each day's puzzle once — a new one arrives at midnight.
     </div>
 
     <div id="venn-playarea">
@@ -1085,12 +1206,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
           <p>A consonant-only word puzzle.</p>
         </div>
       </div>
-      <div class="lives mono" id="vp-lives" aria-label="Lives remaining">&hearts;&hearts;&hearts;</div>
+      <div class="mistakes-wrap">
+        <span class="mistakes-label">Mistakes</span>
+        <div class="lives mono" id="vp-lives" aria-label="Mistakes remaining">&#9679;&#9679;&#9679;</div>
+      </div>
       <button class="info-btn" id="vp-info-btn" aria-label="Show instructions">i</button>
     </div>
 
     <div class="instructions-box" id="vp-instructions-box">
-      <strong>How to play:</strong> Every vowel (A, E, I, O, U) has been stripped out of a word or phrase, leaving only its consonant skeleton below. Figure out what it originally said, then type your full answer back in — vowels and all. A wrong guess costs a life. You have 3 lives, and one puzzle per day — a new one arrives at midnight.
+      <strong>How to play:</strong> Every vowel (A, E, I, O, U) has been stripped out of a word or phrase, leaving only its consonant skeleton below. Figure out what it originally said, then type your full answer back in — vowels and all. A wrong guess costs a mistake. You have 3 mistakes allowed, and one puzzle per day — a new one arrives at midnight.
     </div>
 
     <div id="vp-playarea">
@@ -1297,12 +1421,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
           <p>Order up all the rocks and gems from softest to hardest.</p>
         </div>
       </div>
-      <div class="lives mono" id="mohs-lives" aria-label="Lives remaining">&hearts;&hearts;</div>
+      <div class="mistakes-wrap">
+        <span class="mistakes-label">Mistakes</span>
+        <div class="lives mono" id="mohs-lives" aria-label="Mistakes remaining">&#9679;&#9679;</div>
+      </div>
       <button class="info-btn" id="mohs-info-btn" aria-label="Show instructions">i</button>
     </div>
 
     <div class="instructions-box" id="mohs-instructions-box">
-      <strong>How to play:</strong> You'll see a shuffled list of rocks and gems. Use the arrows on each one to move it up or down until the whole list runs from softest at the top to hardest at the bottom on the Mohs hardness scale. When you're happy with the order, hit "Confirm Guess." Get every single one in the right place and you solve the day's puzzle. If even one is out of place, you lose a life — you only have 2, so make them count!
+      <strong>How to play:</strong> You'll see a shuffled list of rocks and gems. Use the arrows on each one to move it up or down until the whole list runs from softest at the top to hardest at the bottom on the Mohs hardness scale. When you're happy with the order, hit "Confirm Guess." Get every single one in the right place and you solve the day's puzzle. If even one is out of place, that's a mistake — you only have 2, so make them count!
     </div>
 
     <div id="mohs-playarea">
@@ -1415,12 +1542,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
           <p>Guess the 3D shape according to its layout.</p>
         </div>
       </div>
-      <div class="lives mono" id="origami-lives" aria-label="Lives remaining">&hearts;&hearts;&hearts;</div>
+      <div class="mistakes-wrap">
+        <span class="mistakes-label">Mistakes</span>
+        <div class="lives mono" id="origami-lives" aria-label="Mistakes remaining">&#9679;&#9679;&#9679;</div>
+      </div>
       <button class="info-btn" id="origami-info-btn" aria-label="Show instructions">i</button>
     </div>
 
     <div class="instructions-box" id="origami-instructions-box">
-      <strong>How to play:</strong> The picture below is a 3D shape's net — what it looks like unfolded flat into its separate faces, before being folded back up into 3D. Study how the faces are arranged and type the name of the shape it folds into. A wrong guess costs a life. You have 3 lives.
+      <strong>How to play:</strong> The picture below is a 3D shape's net — what it looks like unfolded flat into its separate faces, before being folded back up into 3D. Study how the faces are arranged and type the name of the shape it folds into. A wrong guess costs a mistake. You have 3 mistakes allowed.
     </div>
 
     <div id="origami-playarea">
@@ -1444,6 +1574,89 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
     <div class="modal-card">
       <h2 id="origami-result-title">Folded it!</h2>
       <p id="origami-result-text">You guessed the shape correctly.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-route="home">Back home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     RULEBOOK VIEW
+     ========================================================= -->
+<section class="view" id="view-rulebook">
+  <div class="game-page">
+    <div class="game-topbar">
+      <button class="back-link" data-route="home" aria-label="Back to home">&larr;</button>
+      <div class="game-title-block">
+        <div class="game-title-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="var(--rulebook)"/>
+            <rect x="13" y="9" width="22" height="30" rx="3" fill="#fff"/>
+            <rect x="17" y="16" width="14" height="3" rx="1.5" fill="var(--rulebook)"/>
+            <rect x="17" y="22" width="14" height="3" rx="1.5" fill="var(--rulebook)"/>
+            <rect x="17" y="28" width="9" height="3" rx="1.5" fill="var(--rulebook)"/>
+          </svg>
+        </div>
+        <div class="game-title-text">
+          <h1>Rulebook</h1>
+          <p>Find the secret rule by testing sentences.</p>
+        </div>
+      </div>
+      <button class="info-btn" id="rb-info-btn" aria-label="Show instructions">i</button>
+    </div>
+
+    <div class="instructions-box" id="rb-instructions-box">
+      <strong>How to play:</strong> A secret rule decides whether a sentence is "valid" or "invalid." Type sentences and test them — up to 8 of them — to gather clues about what the rule might be. You'll only ever be told valid or invalid, nothing more. Whenever you're ready, you get exactly <strong>one guess</strong> at what the rule actually is, and you can make it at any time, even before using all your sentences. Guess correctly and you solve the day's puzzle; guess wrong and the puzzle ends. You won't find out the real rule until you win or lose — so choose your final guess carefully! One secret rule per day — a new one arrives at midnight.
+    </div>
+
+    <div id="rb-playarea">
+      <div class="played-banner" id="rb-played-banner" style="border-left-color:var(--rulebook)" hidden>
+        <strong>You already played today's Rulebook.</strong> <span id="rb-played-summary"></span> A new rule unlocks at midnight — this board is just for looking.
+      </div>
+
+      <p class="rb-section-label">Test a sentence &mdash; <span class="rb-counter" id="rb-test-counter">0 / 8</span> used</p>
+
+      <div class="rb-test-row">
+        <input type="text" class="rb-test-input" id="rb-test-input" placeholder="Type a sentence to test&hellip;" autocomplete="off" spellcheck="false" maxlength="120">
+        <button class="rb-test-submit" id="rb-test-submit" aria-label="Test sentence">&rarr;</button>
+      </div>
+
+      <p class="rb-test-feedback" id="rb-test-feedback"></p>
+
+      <div class="rb-history" id="rb-history"></div>
+
+      <hr class="rb-divider">
+
+      <p class="rb-section-label">Guess the secret rule &mdash; 1 guess total</p>
+
+      <div class="rb-guess-row">
+        <input type="text" class="rb-guess-input" id="rb-guess-input" placeholder="Describe the rule in your own words&hellip;" autocomplete="off" spellcheck="false" maxlength="140">
+      </div>
+
+      <div class="rb-confirm-box" id="rb-confirm-box" hidden>
+        <p id="rb-confirm-text">This is your only guess. Submit it as the secret rule?</p>
+        <div class="rb-confirm-actions">
+          <button class="btn btn-ghost" id="rb-confirm-cancel">Cancel</button>
+          <button class="btn btn-primary" id="rb-confirm-submit">Yes, submit</button>
+        </div>
+      </div>
+
+      <div class="rb-guess-submit-row">
+        <button class="rb-guess-submit-btn" id="rb-guess-btn">Guess the Rule</button>
+      </div>
+
+      <div class="rb-reveal-box" id="rb-reveal-box" hidden>
+        <p class="label">The secret rule was</p>
+        <p class="rule-text" id="rb-reveal-text"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="rb-result-modal" hidden>
+    <div class="modal-card">
+      <h2 id="rb-result-title">You cracked it!</h2>
+      <p id="rb-result-text">Your guess matched the secret rule.</p>
       <div class="modal-actions">
         <button class="btn btn-ghost" data-route="home">Back home</button>
       </div>
@@ -1510,7 +1723,7 @@ window.PuzlDaily = (function(){
    Uses the URL hash so the browser back button works too.
    ========================================================= */
 (function(){
-  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami'];
+  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook'];
 
   function showView(name){
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -1526,6 +1739,7 @@ window.PuzlDaily = (function(){
     if(name === 'mohs' && window.MohsGame) window.MohsGame.init();
     if(name === 'letterwise' && window.LetterwiseGame) window.LetterwiseGame.init();
     if(name === 'origami' && window.OrigamiGame) window.OrigamiGame.init();
+    if(name === 'rulebook' && window.RulebookGame) window.RulebookGame.init();
   }
 
   function routeFromHash(){
@@ -1566,27 +1780,48 @@ window.PuzlDaily = (function(){
   const iconEl = document.getElementById('preview-icon');
   const titleEl = document.getElementById('preview-title');
   const phraseEl = document.getElementById('preview-phrase');
+  const completedNoteEl = document.getElementById('preview-completed-note');
   const playBtn = document.getElementById('preview-play-btn');
   const backBtn = document.getElementById('preview-back-btn');
 
   let pendingRoute = null;
+  let closeTimer = null;
 
   function openPreview(cardEl){
     const nameEl = cardEl.querySelector('.game-name');
     const phraseSourceEl = cardEl.querySelector('.game-phrase');
     const iconSourceEl = cardEl.querySelector('.game-icon');
+    const route = cardEl.dataset.preview;
+    const name = nameEl ? nameEl.textContent : '';
 
-    pendingRoute = cardEl.dataset.preview;
-    titleEl.textContent = nameEl ? nameEl.textContent : '';
+    pendingRoute = route;
+    titleEl.textContent = name;
     phraseEl.textContent = phraseSourceEl ? phraseSourceEl.textContent : '';
     iconEl.innerHTML = iconSourceEl ? iconSourceEl.innerHTML : '';
 
+    const alreadyDone = window.PuzlDaily && window.PuzlDaily.getState(route);
+    if(alreadyDone){
+      completedNoteEl.hidden = false;
+      completedNoteEl.textContent = `You've already completed today's ${name}.`;
+      playBtn.textContent = 'Revisit';
+    } else {
+      completedNoteEl.hidden = true;
+      playBtn.textContent = 'Play';
+    }
+
+    if(closeTimer){ clearTimeout(closeTimer); closeTimer = null; }
     modalEl.hidden = false;
+    // remove hidden first, then add the visible class on the next frame so
+    // the opacity/transform transition actually has something to animate from
+    requestAnimationFrame(() => {
+      modalEl.classList.add('visible');
+    });
   }
 
   function closePreview(){
-    modalEl.hidden = true;
+    modalEl.classList.remove('visible');
     pendingRoute = null;
+    closeTimer = setTimeout(() => { modalEl.hidden = true; }, 200);
   }
 
   document.addEventListener('click', e => {
@@ -1622,7 +1857,7 @@ window.PuzlDaily = (function(){
    today's puzzle has already been played.
    ========================================================= */
 window.PuzlHome = (function(){
-  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami'];
+  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook'];
 
   function refresh(){
     GAME_IDS.forEach(id => {
@@ -1792,7 +2027,7 @@ window.VennGame = (function(){
 
   function renderLives(){
     let out = '';
-    for(let i = 0; i < 3; i++) out += i < lives ? '&hearts;' : '<span class="lost">&hearts;</span>';
+    for(let i = 0; i < 3; i++) out += i < lives ? '&#9679;' : '<span class="lost">&#9679;</span>';
     livesEl.innerHTML = out;
   }
 
@@ -1912,10 +2147,10 @@ window.VennGame = (function(){
     let summary;
     if(won){
       resultTitle.textContent = "You win!";
-      summary = `You sorted every item correctly with ${lives} ${lives === 1 ? 'life' : 'lives'} to spare.`;
+      summary = `You sorted every item correctly with ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} to spare.`;
     } else {
-      resultTitle.textContent = "Out of lives";
-      summary = "You ran out of lives before finishing the diagram.";
+      resultTitle.textContent = "Out of mistakes";
+      summary = "You ran out of mistakes before finishing the diagram.";
     }
     resultText.textContent = summary;
     window.PuzlDaily.setState('vennagain', { won, summary });
@@ -2420,7 +2655,7 @@ window.VowelGame = (function(){
 
   function renderLives(){
     let out = '';
-    for(let i = 0; i < 3; i++) out += i < lives ? '&hearts;' : '<span class="lost">&hearts;</span>';
+    for(let i = 0; i < 3; i++) out += i < lives ? '&#9679;' : '<span class="lost">&#9679;</span>';
     livesEl.innerHTML = out;
   }
 
@@ -2464,10 +2699,10 @@ window.VowelGame = (function(){
     shakeInput();
 
     if(lives <= 0){
-      showFeedback('Out of lives.', 'bad');
+      showFeedback('Out of mistakes.', 'bad');
       setTimeout(() => endGame(false), 400);
     } else {
-      showFeedback(`Not quite — ${lives} ${lives === 1 ? 'life' : 'lives'} left.`, 'bad');
+      showFeedback(`Not quite — ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} left.`, 'bad');
     }
     inputEl.value = '';
   }
@@ -2477,9 +2712,9 @@ window.VowelGame = (function(){
     let summary;
     if(won){
       resultTitle.textContent = "Nice work!";
-      summary = `It was "${PUZZLE.phrase}" — solved with ${lives} ${lives === 1 ? 'life' : 'lives'} to spare.`;
+      summary = `It was "${PUZZLE.phrase}" — solved with ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} to spare.`;
     } else {
-      resultTitle.textContent = "Out of lives";
+      resultTitle.textContent = "Out of mistakes";
       summary = `The answer was "${PUZZLE.phrase}".`;
     }
     resultText.textContent = summary;
@@ -3032,7 +3267,7 @@ window.MohsGame = (function(){
 
   function renderLives(){
     let out = '';
-    for(let i = 0; i < MAX_LIVES; i++) out += i < lives ? '&hearts;' : '<span class="lost">&hearts;</span>';
+    for(let i = 0; i < MAX_LIVES; i++) out += i < lives ? '&#9679;' : '<span class="lost">&#9679;</span>';
     livesEl.innerHTML = out;
   }
 
@@ -3111,10 +3346,10 @@ window.MohsGame = (function(){
     lives -= 1;
     renderLives();
     if(lives <= 0){
-      showFeedback('Out of lives.', 'bad');
+      showFeedback('Out of mistakes.', 'bad');
       setTimeout(() => endGame(false), 400);
     } else {
-      showFeedback(`Not quite — at least one is out of place. ${lives} ${lives === 1 ? 'life' : 'lives'} left.`, 'bad');
+      showFeedback(`Not quite — at least one is out of place. ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} left.`, 'bad');
     }
   }
 
@@ -3131,10 +3366,10 @@ window.MohsGame = (function(){
     let summary;
     if(won){
       resultTitle.textContent = "Rock solid!";
-      summary = `You ordered all ${PUZZLE.items.length} correctly with ${lives} ${lives === 1 ? 'life' : 'lives'} to spare.`;
+      summary = `You ordered all ${PUZZLE.items.length} correctly with ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} to spare.`;
     } else {
-      resultTitle.textContent = "Out of lives";
-      summary = "You ran out of lives — the correct order is shown above.";
+      resultTitle.textContent = "Out of mistakes";
+      summary = "You ran out of mistakes — the correct order is shown above.";
     }
     resultText.textContent = summary;
     window.PuzlDaily.setState('mohs', { won, summary });
@@ -3437,7 +3672,7 @@ window.OrigamiGame = (function(){
 
   function renderLives(){
     let out = '';
-    for(let i = 0; i < MAX_LIVES; i++) out += i < lives ? '&hearts;' : '<span class="lost">&hearts;</span>';
+    for(let i = 0; i < MAX_LIVES; i++) out += i < lives ? '&#9679;' : '<span class="lost">&#9679;</span>';
     livesEl.innerHTML = out;
   }
 
@@ -3484,10 +3719,10 @@ window.OrigamiGame = (function(){
     shakeInput();
 
     if(lives <= 0){
-      showFeedback('Out of lives.', 'bad');
+      showFeedback('Out of mistakes.', 'bad');
       setTimeout(() => endGame(false), 400);
     } else {
-      showFeedback(`Not quite — ${lives} ${lives === 1 ? 'life' : 'lives'} left.`, 'bad');
+      showFeedback(`Not quite — ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} left.`, 'bad');
     }
     inputEl.value = '';
   }
@@ -3497,9 +3732,9 @@ window.OrigamiGame = (function(){
     let summary;
     if(won){
       resultTitle.textContent = "Folded it!";
-      summary = `It was a ${PUZZLE.name} — solved with ${lives} ${lives === 1 ? 'life' : 'lives'} to spare.`;
+      summary = `It was a ${PUZZLE.name} — solved with ${lives} ${lives === 1 ? 'mistake' : 'mistakes'} to spare.`;
     } else {
-      resultTitle.textContent = "Out of lives";
+      resultTitle.textContent = "Out of mistakes";
       summary = `The answer was a ${PUZZLE.name}.`;
     }
     resultText.textContent = summary;
@@ -3547,6 +3782,242 @@ window.OrigamiGame = (function(){
     submitBtn.addEventListener('click', submitGuess);
 
     document.getElementById('origami-info-btn').addEventListener('click', () => {
+      instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  return { init };
+})();
+</script>
+
+<script>
+/* =========================================================
+   RULEBOOK — game logic
+   RULEBOOK_RULES holds the full rotation; today's entry is
+   picked by PuzlDaily.dayIndex(). Each rule has a `checker`
+   (runs on every tested sentence, returns valid/invalid) and a
+   `matcher` (runs once, on the player's single final guess,
+   using lenient keyword matching rather than requiring an exact
+   phrase).
+   ========================================================= */
+window.RulebookGame = (function(){
+  const RULEBOOK_RULES = [
+    {
+      display: "The sentence must contain an odd number of words.",
+      checker: s => { const words = s.trim().split(/\s+/).filter(Boolean); return words.length % 2 === 1; },
+      matcher: g => g.includes('odd') && g.includes('word')
+    },
+    {
+      display: "The sentence must contain the same letter twice in a row (like the \u2018ll\u2019 in \u2018hello\u2019).",
+      checker: s => /([a-zA-Z])\1/.test(s),
+      matcher: g => (g.includes('double') || g.includes('repeat') || g.includes('twice') || g.includes('same letter')) && g.includes('letter')
+    },
+    {
+      display: "The sentence must contain a number (a digit, like 0-9).",
+      checker: s => /[0-9]/.test(s),
+      matcher: g => g.includes('number') || g.includes('digit')
+    },
+    {
+      display: "The sentence's first word and last word must start with the same letter.",
+      checker: s => { const w = s.match(/[A-Za-z']+/g) || []; if(w.length === 0) return false; return w[0][0].toLowerCase() === w[w.length - 1][0].toLowerCase(); },
+      matcher: g => g.includes('first') && g.includes('last') && (g.includes('letter') || g.includes('start'))
+    },
+    {
+      display: "The sentence must contain exactly one comma.",
+      checker: s => (s.match(/,/g) || []).length === 1,
+      matcher: g => g.includes('comma') && (g.includes('one') || g.includes('single'))
+    },
+    {
+      display: "Every word in the sentence must have at least 4 letters.",
+      checker: s => { const w = s.match(/[A-Za-z']+/g) || []; return w.length > 0 && w.every(x => x.length >= 4); },
+      matcher: g => (g.includes('4') || g.includes('four')) && g.includes('letter') && (g.includes('every') || g.includes('all') || g.includes('each'))
+    },
+    {
+      display: "The sentence must end with a question mark.",
+      checker: s => s.trim().endsWith('?'),
+      matcher: g => g.includes('?') || (g.includes('question') && g.includes('mark')) || (g.includes('end') && g.includes('question'))
+    }
+  ];
+
+  const MAX_SENTENCES = 8;
+
+  let RULE = RULEBOOK_RULES[0];
+  let history = []; // { text, valid }
+  let guessArmed = false;
+  let gameOver = false;
+  let readOnly = false;
+  let listenersBound = false;
+
+  const bannerEl = document.getElementById('rb-played-banner');
+  const bannerSummaryEl = document.getElementById('rb-played-summary');
+  const counterEl = document.getElementById('rb-test-counter');
+  const testInput = document.getElementById('rb-test-input');
+  const testSubmitBtn = document.getElementById('rb-test-submit');
+  const testFeedbackEl = document.getElementById('rb-test-feedback');
+  const historyEl = document.getElementById('rb-history');
+  const guessInput = document.getElementById('rb-guess-input');
+  const guessBtn = document.getElementById('rb-guess-btn');
+  const confirmBox = document.getElementById('rb-confirm-box');
+  const confirmText = document.getElementById('rb-confirm-text');
+  const confirmCancelBtn = document.getElementById('rb-confirm-cancel');
+  const confirmSubmitBtn = document.getElementById('rb-confirm-submit');
+  const revealBox = document.getElementById('rb-reveal-box');
+  const revealText = document.getElementById('rb-reveal-text');
+  const modalEl = document.getElementById('rb-result-modal');
+  const resultTitle = document.getElementById('rb-result-title');
+  const resultText = document.getElementById('rb-result-text');
+  const instructionsBox = document.getElementById('rb-instructions-box');
+
+  function renderCounter(){
+    counterEl.textContent = `${history.length} / ${MAX_SENTENCES}`;
+  }
+
+  function renderHistory(){
+    historyEl.innerHTML = '';
+    if(history.length === 0){
+      const empty = document.createElement('p');
+      empty.className = 'rb-history-empty';
+      empty.textContent = readOnly ? '' : 'No sentences tested yet.';
+      historyEl.appendChild(empty);
+      return;
+    }
+    history.forEach(h => {
+      const row = document.createElement('div');
+      row.className = 'rb-history-row';
+      const tagClass = h.valid ? 'valid' : 'invalidresult';
+      row.innerHTML = `<span class="sentence">${h.text}</span><span class="rb-history-tag ${tagClass}">${h.valid ? 'Valid' : 'Invalid'}</span>`;
+      historyEl.appendChild(row);
+    });
+  }
+
+  function showTestFeedback(msg, valid){
+    testFeedbackEl.textContent = msg;
+    testFeedbackEl.className = 'rb-test-feedback' + (valid === true ? ' valid' : valid === false ? ' invalidresult' : '');
+  }
+
+  function shake(el){
+    el.classList.remove('invalid');
+    void el.offsetWidth;
+    el.classList.add('invalid');
+  }
+
+  function updateTestControlsState(){
+    const disabled = readOnly || gameOver || history.length >= MAX_SENTENCES;
+    testInput.disabled = disabled;
+    testSubmitBtn.disabled = disabled;
+  }
+
+  function testSentence(){
+    if(readOnly || gameOver || history.length >= MAX_SENTENCES) return;
+    const raw = testInput.value.trim();
+    if(!raw){ shake(testInput); return; }
+
+    const valid = RULE.checker(raw);
+    history.push({ text: raw, valid });
+    renderHistory();
+    renderCounter();
+    showTestFeedback(valid ? 'Valid' : 'Invalid', valid);
+    testInput.value = '';
+    updateTestControlsState();
+  }
+
+  function armGuess(){
+    if(readOnly || gameOver) return;
+    const raw = guessInput.value.trim();
+    if(!raw){ shake(guessInput); return; }
+    guessArmed = true;
+    confirmText.textContent = `This is your only guess. Submit "${raw}" as the secret rule?`;
+    confirmBox.hidden = false;
+    guessBtn.disabled = true;
+  }
+
+  function cancelGuess(){
+    guessArmed = false;
+    confirmBox.hidden = true;
+    guessBtn.disabled = false;
+  }
+
+  function submitFinalGuess(){
+    const raw = guessInput.value.trim();
+    const normalized = raw.toLowerCase();
+    const won = RULE.matcher(normalized);
+    endGame(won, raw);
+  }
+
+  function endGame(won, guessTextValue){
+    gameOver = true;
+    confirmBox.hidden = true;
+    guessInput.disabled = true;
+    guessBtn.disabled = true;
+    updateTestControlsState();
+
+    revealBox.hidden = false;
+    revealText.textContent = RULE.display;
+
+    modalEl.hidden = false;
+    let summary;
+    if(won){
+      resultTitle.textContent = "You cracked it!";
+      summary = `Your guess "${guessTextValue}" matched the secret rule, using ${history.length} test sentence${history.length === 1 ? '' : 's'}.`;
+    } else {
+      resultTitle.textContent = "Not quite";
+      summary = `Your guess "${guessTextValue}" didn't match the secret rule.`;
+    }
+    resultText.textContent = summary;
+    window.PuzlDaily.setState('rulebook', { won, summary, guessText: guessTextValue, history: history.slice() });
+  }
+
+  function init(){
+    bindListenersOnce();
+    RULE = RULEBOOK_RULES[window.PuzlDaily.dayIndex(RULEBOOK_RULES.length)];
+    modalEl.hidden = true;
+    confirmBox.hidden = true;
+    guessArmed = false;
+
+    const state = window.PuzlDaily.getState('rulebook');
+    readOnly = !!state;
+
+    if(readOnly){
+      history = state.history || [];
+      gameOver = true;
+      renderHistory();
+      renderCounter();
+      showTestFeedback('', null);
+      guessInput.value = state.guessText || '';
+      guessInput.disabled = true;
+      guessBtn.disabled = true;
+      updateTestControlsState();
+      revealBox.hidden = false;
+      revealText.textContent = RULE.display;
+      bannerEl.hidden = false;
+      bannerSummaryEl.textContent = state.summary || '';
+    } else {
+      history = [];
+      gameOver = false;
+      renderHistory();
+      renderCounter();
+      showTestFeedback('', null);
+      guessInput.value = '';
+      guessInput.disabled = false;
+      guessBtn.disabled = false;
+      updateTestControlsState();
+      revealBox.hidden = true;
+      bannerEl.hidden = true;
+    }
+  }
+
+  function bindListenersOnce(){
+    if(listenersBound) return;
+    listenersBound = true;
+
+    testInput.addEventListener('keydown', e => { if(e.key === 'Enter') testSentence(); });
+    testSubmitBtn.addEventListener('click', testSentence);
+
+    guessBtn.addEventListener('click', armGuess);
+    confirmCancelBtn.addEventListener('click', cancelGuess);
+    confirmSubmitBtn.addEventListener('click', submitFinalGuess);
+
+    document.getElementById('rb-info-btn').addEventListener('click', () => {
       instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
     });
   }
