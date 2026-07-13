@@ -6,6 +6,19 @@
 <title>Puzl — Daily Puzzle Games</title>
 <meta name="description" content="Puzl is a home for daily puzzle games: logic, wordplay, and everything in between.">
 
+<script>
+/* Applied before any CSS renders, so there's no flash of the wrong
+   theme/layout on load. Defaults: light theme, list layout. */
+(function(){
+  try{
+    var raw = localStorage.getItem('puzl_prefs_v1');
+    var prefs = raw ? JSON.parse(raw) : {};
+    if(prefs.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+    if(prefs.layout === 'grid') document.documentElement.setAttribute('data-layout', 'grid');
+  }catch(e){ /* localStorage unavailable — fall back to defaults */ }
+})();
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -66,6 +79,14 @@
   --rulebook-dark: #2C3A6B;
   --rulebook-tint: #E7EAF5;
 
+  --fearfactor:      #8E3B46;
+  --fearfactor-dark: #6B2934;
+  --fearfactor-tint: #F5E3E6;
+
+  --tessellate:      #7CB518;
+  --tessellate-dark: #5A8712;
+  --tessellate-tint: #EEF6DC;
+
   --danger:     #E8503D;
   --danger-tint:#FDE7E4;
   --success:    #1FA971;
@@ -79,6 +100,21 @@
   --radius-sm: 8px;
 }
 
+/* Dark mode: overrides the neutral tokens only — accent colors stay
+   the same across both themes, same approach modern dark-mode UIs use. */
+html[data-theme="dark"]{
+  --bg:        #14181F;
+  --surface:   #1E242E;
+  --ink:       #F0F2F5;
+  --ink-soft:  #B8C0CC;
+  --ink-faint: #7A8494;
+  --line:      #2E3644;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.28);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.32);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.42);
+}
+
 *, *::before, *::after{ box-sizing:border-box; }
 
 html, body{
@@ -88,6 +124,7 @@ html, body{
   color:var(--ink);
   font-family:'Inter', system-ui, sans-serif;
   -webkit-font-smoothing:antialiased;
+  transition:background 0.15s ease, color 0.15s ease;
 }
 body{ min-height:100dvh; }
 h1, h2, h3{ font-family:'Baloo 2', system-ui, sans-serif; margin:0; }
@@ -113,6 +150,18 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
 
 .home-wrap{ max-width:600px; margin:0 auto; padding:36px 20px 80px; }
 
+#view-home{ position:relative; }
+.home-toolbar{
+  position:absolute; top:20px; left:20px; display:flex; gap:8px; z-index:5;
+}
+.home-toolbar button{
+  width:38px; height:38px; border-radius:50%; background:var(--surface); border:1px solid var(--line);
+  box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:center;
+  color:var(--ink-soft); transition:background 0.15s ease, color 0.15s ease;
+}
+.home-toolbar button:hover{ background:var(--bg); color:var(--ink); }
+.home-toolbar svg{ width:18px; height:18px; display:block; }
+
 .home-header{
   display:flex; flex-direction:column; align-items:center; text-align:center;
   gap:10px; margin-bottom:34px;
@@ -133,6 +182,19 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
 }
 
 .game-list{ display:flex; flex-direction:column; gap:14px; list-style:none; margin:0; padding:0; }
+
+/* Grid layout mode: toggled via html[data-layout="grid"] */
+html[data-layout="grid"] .game-list{
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+}
+html[data-layout="grid"] .game-list li{ display:block; }
+html[data-layout="grid"] .game-card{
+  flex-direction:column; text-align:center; gap:10px; padding:20px 14px; height:100%;
+}
+html[data-layout="grid"] .game-icon{ width:60px; height:60px; }
+html[data-layout="grid"] .game-info{ width:100%; }
+html[data-layout="grid"] .game-info .game-phrase{ font-size:12.5px; }
+html[data-layout="grid"] .game-chevron{ display:none; }
 
 .game-card{
   display:flex; align-items:center; gap:16px; background:var(--surface);
@@ -236,6 +298,15 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
   background:var(--bg); border-radius:var(--radius-sm); padding:9px 14px;
   font-size:13px; color:var(--ink-soft); margin-bottom:4px;
 }
+
+.preview-difficulty-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.preview-diff-btn{
+  display:inline-flex; align-items:center; justify-content:center; padding:11px 18px;
+  border-radius:999px; font-weight:600; font-size:14px; background:var(--ink); color:#fff;
+  transition:transform 0.15s ease;
+}
+.preview-diff-btn:hover{ transform:translateY(-1px); }
+.preview-diff-btn.done{ background:var(--bg); color:var(--ink-soft); border:1px solid var(--line); }
 
 /* fade + gentle pop entrance for the game preview popup specifically */
 #preview-modal{ opacity:0; transition:opacity 0.2s ease; }
@@ -567,31 +638,33 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
   margin:0 4px 8px;
 }
 
-.mohs-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
-
-.mohs-item{
-  display:flex; align-items:center; gap:12px; background:var(--surface);
-  border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 14px;
-  transition:border-color 0.2s ease, background 0.2s ease;
+.mohs-grid{
+  display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:20px;
 }
-.mohs-item.correct{ border-color:var(--success); background:var(--deco-tint); }
+
+.mohs-tile{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  background:var(--surface); border:2px solid var(--line); border-radius:var(--radius-md);
+  padding:14px 8px; min-height:92px; text-align:center; cursor:grab; touch-action:none;
+  transition:border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+  user-select:none; -webkit-user-select:none;
+}
+.mohs-tile.correct{ border-color:var(--success); background:var(--deco-tint); cursor:default; }
+.mohs-tile.dragging{ opacity:0.4; cursor:grabbing; }
+.mohs-tile.drag-over{ border-color:var(--mohs); background:var(--mohs-tint); transform:scale(1.04); }
+.mohs-tile.readonly{ cursor:default; }
 
 .mohs-rank{
-  width:28px; height:28px; border-radius:50%; background:var(--mohs-tint); color:var(--mohs-dark);
-  font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:13px;
+  width:26px; height:26px; border-radius:50%; background:var(--mohs-tint); color:var(--mohs-dark);
+  font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:12px;
   display:flex; align-items:center; justify-content:center; flex:0 0 auto;
 }
 
-.mohs-name{ flex:1 1 auto; font-weight:700; font-size:15px; color:var(--ink); }
+.mohs-name{ font-weight:700; font-size:13.5px; color:var(--ink); line-height:1.25; }
 
-.mohs-arrows{ display:flex; flex-direction:column; gap:4px; flex:0 0 auto; }
-.mohs-arrow-btn{
-  width:30px; height:24px; border-radius:6px; border:1px solid var(--line);
-  background:var(--bg); color:var(--ink-soft); font-size:12px;
-  display:flex; align-items:center; justify-content:center;
+.mohs-drag-hint{
+  text-align:center; font-size:12px; color:var(--ink-faint); margin:-8px 0 18px;
 }
-.mohs-arrow-btn:hover:not(:disabled){ background:var(--mohs-tint); color:var(--mohs-dark); }
-.mohs-arrow-btn:disabled{ opacity:0.3; cursor:default; }
 
 .mohs-confirm-row{ text-align:center; margin-top:auto; padding-top:6px; }
 .mohs-confirm-btn{
@@ -759,6 +832,91 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
   letter-spacing:0.6px; color:var(--rulebook-dark); margin-bottom:6px;
 }
 .rb-reveal-box .rule-text{ font-weight:700; color:var(--ink); font-size:14.5px; line-height:1.4; }
+
+/* =========================================================
+   FEAR FACTOR
+   ========================================================= */
+
+.ff-difficulty-badge{
+  display:inline-block; font-family:'IBM Plex Mono', monospace; font-size:10.5px;
+  text-transform:uppercase; letter-spacing:0.6px; font-weight:700; color:var(--fearfactor-dark);
+  background:var(--fearfactor-tint); padding:3px 10px; border-radius:999px; margin-top:2px;
+}
+
+.ff-phobia-wrap{ text-align:center; margin:10px 0 24px; }
+.ff-phobia-name{
+  font-family:'Baloo 2', sans-serif; font-weight:800; font-size:32px; line-height:1.15;
+  color:var(--fearfactor-dark); word-break:break-word;
+}
+.ff-phobia-label{
+  font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase;
+  letter-spacing:0.8px; color:var(--ink-faint); margin-top:6px;
+}
+
+.ff-input-row{ display:flex; gap:10px; margin-bottom:10px; }
+.ff-input{
+  flex:1 1 auto; padding:13px 16px; border-radius:999px; border:2px solid var(--line);
+  font-size:16px; background:var(--surface); color:var(--ink);
+}
+.ff-input:focus{ outline:none; border-color:var(--fearfactor); }
+.ff-input.invalid{ border-color:var(--danger); animation:input-shake 0.4s ease; }
+.ff-input:disabled{ opacity:0.5; }
+
+.ff-submit{
+  flex:0 0 auto; width:52px; height:52px; border-radius:50%; background:var(--fearfactor); color:#fff;
+  font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm);
+}
+.ff-submit:hover{ background:var(--fearfactor-dark); }
+.ff-submit:disabled{ opacity:0.5; cursor:default; }
+
+.ff-feedback{ min-height:20px; text-align:center; font-size:13.5px; margin-bottom:20px; color:var(--ink-soft); }
+.ff-feedback.ok{ color:var(--fearfactor-dark); font-weight:600; }
+.ff-feedback.bad{ color:var(--danger); font-weight:600; }
+
+.ff-guess-history{ display:flex; flex-direction:column; gap:8px; margin-top:auto; }
+.ff-guess-chip{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:9px 14px; font-size:13.5px; color:var(--ink-soft); text-align:center;
+}
+
+/* =========================================================
+   TESSELLATE
+   ========================================================= */
+
+.tess-timer-value{ font-size:15px !important; font-weight:700; }
+.tess-timer-value.low{ color:var(--danger); }
+
+.tess-progress{ text-align:center; font-size:13.5px; color:var(--ink-soft); margin-bottom:14px; }
+.tess-progress strong{ color:var(--tessellate-dark); }
+
+.tess-start-wrap{ text-align:center; padding:36px 16px; }
+.tess-start-wrap p{ color:var(--ink-soft); font-size:14px; margin-bottom:18px; line-height:1.5; }
+.tess-start-btn{
+  padding:14px 34px; border-radius:999px; background:var(--tessellate); color:#fff; font-weight:700; font-size:15.5px;
+}
+.tess-start-btn:hover{ background:var(--tessellate-dark); }
+
+.tess-grid{
+  display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
+  max-width:340px; margin:0 auto 18px;
+}
+.tess-tile{
+  aspect-ratio:1/1; background:var(--surface); border:2px solid var(--line); border-radius:var(--radius-sm);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; padding:8px;
+  transition:transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.tess-tile svg{ width:100%; height:100%; display:block; }
+.tess-tile:hover{ transform:scale(1.04); }
+.tess-tile.correct-flash{ border-color:var(--success); background:var(--deco-tint); }
+.tess-tile.wrong-flash{ border-color:var(--danger); background:var(--danger-tint); animation:tess-shake 0.3s ease; }
+.tess-tile.tess-disabled{ pointer-events:none; opacity:0.55; }
+@keyframes tess-shake{
+  0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-5px); } 40%{ transform:translateX(5px); }
+  60%{ transform:translateX(-3px); } 80%{ transform:translateX(3px); }
+}
+
+.tess-feedback{ text-align:center; font-size:13px; color:var(--ink-soft); min-height:18px; margin-bottom:6px; }
+.tess-feedback.bad{ color:var(--danger); font-weight:600; }
 </style>
 </head>
 <body>
@@ -767,6 +925,10 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
      HOME VIEW
      ========================================================= -->
 <section class="view active" id="view-home">
+  <div class="home-toolbar">
+    <button type="button" id="theme-toggle-btn" aria-label="Switch to dark mode"></button>
+    <button type="button" id="layout-toggle-btn" aria-label="Switch to grid layout"></button>
+  </div>
   <div class="home-wrap">
     <header class="home-header">
       <svg class="logo-mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -958,6 +1120,42 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
           <div class="game-chevron">&rsaquo;</div>
         </button>
       </li>
+      <li>
+        <button class="game-card" data-preview="fearfactor" data-difficulties="easy,medium,expert">
+          <div class="game-icon">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" fill="var(--fearfactor)"/>
+              <rect x="21" y="10" width="6" height="20" rx="3" fill="#fff"/>
+              <circle cx="24" cy="36" r="4" fill="#fff"/>
+            </svg>
+          </div>
+          <div class="game-info">
+            <div class="game-name">Fear Factor</div>
+            <div class="game-phrase">Figure out what today's phobia is the fear of.</div>
+            <span class="game-badge" id="badge-fearfactor" data-category="Wordplay">Wordplay</span>
+          </div>
+          <div class="game-chevron">&rsaquo;</div>
+        </button>
+      </li>
+      <li>
+        <button class="game-card" data-preview="tessellate">
+          <div class="game-icon">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" fill="var(--tessellate)"/>
+              <rect x="8" y="8" width="13" height="13" rx="2" fill="#fff" opacity="0.9"/>
+              <rect x="27" y="8" width="13" height="13" rx="2" fill="#fff" opacity="0.9"/>
+              <rect x="8" y="27" width="13" height="13" rx="2" fill="#fff" opacity="0.45"/>
+              <rect x="27" y="27" width="13" height="13" rx="2" fill="#fff" opacity="0.9"/>
+            </svg>
+          </div>
+          <div class="game-info">
+            <div class="game-name">Tessellate</div>
+            <div class="game-phrase">A high-speed game about ruling out design tiles.</div>
+            <span class="game-badge" id="badge-tessellate" data-category="Logic">Logic</span>
+          </div>
+          <div class="game-chevron">&rsaquo;</div>
+        </button>
+      </li>
     </ul>
 
     <p class="more-soon">More puzzles are on the way — check back soon.</p>
@@ -974,6 +1172,7 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
     <h2 id="preview-title">Game name</h2>
     <p id="preview-phrase">Short phrase</p>
     <p class="preview-completed-note" id="preview-completed-note" hidden></p>
+    <div class="preview-difficulty-row" id="preview-difficulty-row" hidden></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="preview-back-btn">Back</button>
       <button class="btn btn-primary" id="preview-play-btn">Play</button>
@@ -1439,7 +1638,8 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
 
       <div class="mohs-scale-labels"><span>&larr; Softest</span><span>Hardest &rarr;</span></div>
 
-      <div class="mohs-list" id="mohs-list"></div>
+      <div class="mohs-grid" id="mohs-list"></div>
+      <p class="mohs-drag-hint" id="mohs-drag-hint">Drag tiles to reorder them.</p>
 
       <p class="mohs-feedback" id="mohs-feedback"></p>
 
@@ -1664,6 +1864,128 @@ button:focus-visible, a:focus-visible, [tabindex]:focus-visible{
   </div>
 </section>
 
+<!-- =========================================================
+     FEAR FACTOR VIEW
+     ========================================================= -->
+<section class="view" id="view-fearfactor">
+  <div class="game-page">
+    <div class="game-topbar">
+      <button class="back-link" data-route="home" aria-label="Back to home">&larr;</button>
+      <div class="game-title-block">
+        <div class="game-title-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="var(--fearfactor)"/>
+            <rect x="21" y="10" width="6" height="20" rx="3" fill="#fff"/>
+            <circle cx="24" cy="36" r="4" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="game-title-text">
+          <h1>Fear Factor</h1>
+          <p>Figure out what today's phobia is the fear of.</p>
+          <span class="ff-difficulty-badge" id="ff-difficulty-badge">Easy</span>
+        </div>
+      </div>
+      <div class="lives mono" id="ff-lives" aria-label="Mistakes remaining">&#9679;&#9679;&#9679;</div>
+      <button class="info-btn" id="ff-info-btn" aria-label="Show instructions">i</button>
+    </div>
+
+    <div class="instructions-box" id="ff-instructions-box">
+      <strong>How to play:</strong> You're shown the name of a real phobia — but not what it's actually a fear of. Type your best guess at what it means. You get 3 guesses, full stop: no hints, no clues, no accuracy meter, just hit or miss. Get it right and you win; use up all 3 guesses and the puzzle's over for the day. Pick a difficulty from the home screen — Easy, Medium, or Expert — each has its own phobia and its own daily result, so you can play all three separately.
+    </div>
+
+    <div id="ff-playarea">
+      <div class="played-banner" id="ff-played-banner" style="border-left-color:var(--fearfactor)" hidden>
+        <strong>You already played today's Fear Factor on this difficulty.</strong> <span id="ff-played-summary"></span> A new phobia unlocks at midnight — this board is just for looking.
+      </div>
+
+      <div class="ff-phobia-wrap">
+        <div class="ff-phobia-name" id="ff-phobia-name">Phobia</div>
+        <p class="ff-phobia-label">is the fear of&hellip;?</p>
+      </div>
+
+      <div class="ff-input-row">
+        <input type="text" class="ff-input" id="ff-input" placeholder="Type your guess&hellip;" autocomplete="off" spellcheck="false" maxlength="60">
+        <button class="ff-submit" id="ff-submit" aria-label="Submit guess">&rarr;</button>
+      </div>
+
+      <p class="ff-feedback" id="ff-feedback"></p>
+      <div class="ff-guess-history" id="ff-guess-history"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="ff-result-modal" hidden>
+    <div class="modal-card">
+      <h2 id="ff-result-title">Nailed it!</h2>
+      <p id="ff-result-text">You figured out the phobia.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-route="home">Back home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     TESSELLATE VIEW
+     ========================================================= -->
+<section class="view" id="view-tessellate">
+  <div class="game-page">
+    <div class="game-topbar">
+      <button class="back-link" data-route="home" aria-label="Back to home">&larr;</button>
+      <div class="game-title-block">
+        <div class="game-title-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="var(--tessellate)"/>
+            <rect x="8" y="8" width="13" height="13" rx="2" fill="#fff" opacity="0.9"/>
+            <rect x="27" y="8" width="13" height="13" rx="2" fill="#fff" opacity="0.9"/>
+            <rect x="8" y="27" width="13" height="13" rx="2" fill="#fff" opacity="0.45"/>
+            <rect x="27" y="27" width="13" height="13" rx="2" fill="#fff" opacity="0.9"/>
+          </svg>
+        </div>
+        <div class="game-title-text">
+          <h1>Tessellate</h1>
+          <p>A high-speed game about ruling out design tiles.</p>
+        </div>
+      </div>
+      <div class="mistakes-wrap">
+        <span class="mistakes-label">Time Left</span>
+        <div class="lives mono tess-timer-value" id="tess-timer">1:30</div>
+      </div>
+      <button class="info-btn" id="tess-info-btn" aria-label="Show instructions">i</button>
+    </div>
+
+    <div class="instructions-box" id="tess-instructions-box">
+      <strong>How to play:</strong> Each round, 16 tiles appear and exactly one of them doesn't match the rest — find it and tap it. Get one right and the whole board changes to a new pattern, a little trickier than the last. You need to find 10 odd tiles to win, and you're working against the clock: you start with 1:30, and every wrong tap costs you 5 seconds instantly. No pauses, no do-overs — just fast eyes and a steady hand. One attempt per day.
+    </div>
+
+    <div id="tess-playarea">
+      <div class="played-banner" id="tess-played-banner" style="border-left-color:var(--tessellate)" hidden>
+        <strong>You already played today's Tessellate.</strong> <span id="tess-played-summary"></span> A fresh run unlocks at midnight — this board is just for looking.
+      </div>
+
+      <div class="tess-start-wrap" id="tess-start-wrap">
+        <p>Find 10 odd tiles before the clock runs out. Every wrong tap costs 5 seconds.</p>
+        <button class="tess-start-btn" id="tess-start-btn">Start</button>
+      </div>
+
+      <div id="tess-active-area" hidden>
+        <p class="tess-progress"><strong id="tess-found-count">0</strong> / 10 found</p>
+        <div class="tess-grid" id="tess-grid"></div>
+        <p class="tess-feedback" id="tess-feedback"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="tess-result-modal" hidden>
+    <div class="modal-card">
+      <h2 id="tess-result-title">All 10 found!</h2>
+      <p id="tess-result-text">You cleared the board with time to spare.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-route="home">Back home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <script>
 /* =========================================================
    PUZL DAILY — shared date/rotation/progress utilities.
@@ -1719,15 +2041,113 @@ window.PuzlDaily = (function(){
 
 <script>
 /* =========================================================
+   PUZL PREFS — dark/light theme and grid/list layout, both
+   persisted in localStorage and applied via data attributes on
+   <html> (already set as early as possible by the inline script
+   in <head> to avoid a flash of the wrong theme/layout).
+   ========================================================= */
+window.PuzlPrefs = (function(){
+  const STORAGE_KEY = 'puzl_prefs_v1';
+
+  const SUN_ICON = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4.2" y1="4.2" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.8" y2="19.8"/><line x1="4.2" y1="19.8" x2="6.3" y2="17.7"/><line x1="17.7" y1="6.3" x2="19.8" y2="4.2"/></g></svg>';
+  const MOON_ICON = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 1 0 10.5 10.5Z"/></svg>';
+  const LIST_ICON = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor"><rect x="3" y="5" width="18" height="3" rx="1.3"/><rect x="3" y="10.5" width="18" height="3" rx="1.3"/><rect x="3" y="16" width="18" height="3" rx="1.3"/></g></svg>';
+  const GRID_ICON = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="1.8"/><rect x="13" y="3" width="8" height="8" rx="1.8"/><rect x="3" y="13" width="8" height="8" rx="1.8"/><rect x="13" y="13" width="8" height="8" rx="1.8"/></g></svg>';
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+
+  function save(prefs){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs)); }catch(e){ /* ignore */ }
+  }
+
+  function currentTheme(){
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function currentLayout(){
+    return document.documentElement.getAttribute('data-layout') === 'grid' ? 'grid' : 'list';
+  }
+
+  function applyThemeIcon(){
+    const btn = document.getElementById('theme-toggle-btn');
+    if(!btn) return;
+    const isDark = currentTheme() === 'dark';
+    // icon shows the mode currently active (sun while light, moon while dark)
+    btn.innerHTML = isDark ? MOON_ICON : SUN_ICON;
+    btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  function applyLayoutIcon(){
+    const btn = document.getElementById('layout-toggle-btn');
+    if(!btn) return;
+    const isGrid = currentLayout() === 'grid';
+    // icon shows the mode currently active (list while list, grid while grid)
+    btn.innerHTML = isGrid ? GRID_ICON : LIST_ICON;
+    btn.setAttribute('aria-label', isGrid ? 'Switch to list layout' : 'Switch to grid layout');
+  }
+
+  function toggleTheme(){
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    if(next === 'dark'){
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    const prefs = load();
+    prefs.theme = next;
+    save(prefs);
+    applyThemeIcon();
+  }
+
+  function toggleLayout(){
+    const next = currentLayout() === 'grid' ? 'list' : 'grid';
+    if(next === 'grid'){
+      document.documentElement.setAttribute('data-layout', 'grid');
+    } else {
+      document.documentElement.removeAttribute('data-layout');
+    }
+    const prefs = load();
+    prefs.layout = next;
+    save(prefs);
+    applyLayoutIcon();
+  }
+
+  function init(){
+    applyThemeIcon();
+    applyLayoutIcon();
+    const themeBtn = document.getElementById('theme-toggle-btn');
+    const layoutBtn = document.getElementById('layout-toggle-btn');
+    if(themeBtn) themeBtn.addEventListener('click', toggleTheme);
+    if(layoutBtn) layoutBtn.addEventListener('click', toggleLayout);
+  }
+
+  init();
+  return { toggleTheme, toggleLayout };
+})();
+</script>
+
+<script>
+/* =========================================================
    ROUTER — swaps which <section class="view"> is visible.
    Uses the URL hash so the browser back button works too.
    ========================================================= */
 (function(){
-  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook'];
+  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor-easy', 'fearfactor-medium', 'fearfactor-expert', 'tessellate'];
 
   function showView(name){
+    // Fear Factor has 3 difficulties that all share one view section;
+    // "fearfactor-easy" etc. route to #view-fearfactor with the
+    // difficulty passed along to the game's init() function.
+    const isFearFactor = name.indexOf('fearfactor') === 0;
+    const sectionId = isFearFactor ? 'view-fearfactor' : 'view-' + name;
+
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-' + name).classList.add('active');
+    document.getElementById(sectionId).classList.add('active');
     window.scrollTo(0, 0);
     if(name === 'home' && window.PuzlHome) window.PuzlHome.refresh();
     if(name === 'vennagain' && window.VennGame) window.VennGame.init();
@@ -1740,6 +2160,8 @@ window.PuzlDaily = (function(){
     if(name === 'letterwise' && window.LetterwiseGame) window.LetterwiseGame.init();
     if(name === 'origami' && window.OrigamiGame) window.OrigamiGame.init();
     if(name === 'rulebook' && window.RulebookGame) window.RulebookGame.init();
+    if(isFearFactor && window.FearFactorGame) window.FearFactorGame.init(name.split('-')[1] || 'easy');
+    if(name === 'tessellate' && window.TessellateGame) window.TessellateGame.init();
   }
 
   function routeFromHash(){
@@ -1774,6 +2196,12 @@ window.PuzlDaily = (function(){
    any new game added later works automatically as long as its
    home card follows the existing .game-icon/.game-name/.game-phrase
    structure and uses data-preview="<route>" instead of data-route.
+
+   Games with more than one difficulty (e.g. Fear Factor) add
+   data-difficulties="easy,medium,expert" to their card — the modal
+   then shows one button per difficulty (routing to "<route>-<diff>")
+   instead of the usual single Play button, and each button reflects
+   whether that specific difficulty is already done today.
    ========================================================= */
 (function(){
   const modalEl = document.getElementById('preview-modal');
@@ -1781,11 +2209,14 @@ window.PuzlDaily = (function(){
   const titleEl = document.getElementById('preview-title');
   const phraseEl = document.getElementById('preview-phrase');
   const completedNoteEl = document.getElementById('preview-completed-note');
+  const difficultyRowEl = document.getElementById('preview-difficulty-row');
   const playBtn = document.getElementById('preview-play-btn');
   const backBtn = document.getElementById('preview-back-btn');
 
   let pendingRoute = null;
   let closeTimer = null;
+
+  function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
   function openPreview(cardEl){
     const nameEl = cardEl.querySelector('.game-name');
@@ -1793,20 +2224,57 @@ window.PuzlDaily = (function(){
     const iconSourceEl = cardEl.querySelector('.game-icon');
     const route = cardEl.dataset.preview;
     const name = nameEl ? nameEl.textContent : '';
+    const difficultiesAttr = cardEl.dataset.difficulties;
 
     pendingRoute = route;
     titleEl.textContent = name;
     phraseEl.textContent = phraseSourceEl ? phraseSourceEl.textContent : '';
     iconEl.innerHTML = iconSourceEl ? iconSourceEl.innerHTML : '';
 
-    const alreadyDone = window.PuzlDaily && window.PuzlDaily.getState(route);
-    if(alreadyDone){
-      completedNoteEl.hidden = false;
-      completedNoteEl.textContent = `You've already completed today's ${name}.`;
-      playBtn.textContent = 'Revisit';
+    if(difficultiesAttr){
+      const diffs = difficultiesAttr.split(',');
+      playBtn.hidden = true;
+      difficultyRowEl.hidden = false;
+      difficultyRowEl.innerHTML = '';
+
+      let doneCount = 0;
+      diffs.forEach(d => {
+        const key = route + '-' + d;
+        const done = window.PuzlDaily && window.PuzlDaily.getState(key);
+        if(done) doneCount++;
+
+        const btn = document.createElement('button');
+        btn.className = 'preview-diff-btn' + (done ? ' done' : '');
+        btn.textContent = done ? `${capitalize(d)} \u2713` : capitalize(d);
+        btn.addEventListener('click', () => {
+          closePreview();
+          location.hash = key;
+        });
+        difficultyRowEl.appendChild(btn);
+      });
+
+      if(doneCount === diffs.length){
+        completedNoteEl.hidden = false;
+        completedNoteEl.textContent = `You've already completed today's ${name} in every difficulty.`;
+      } else if(doneCount > 0){
+        completedNoteEl.hidden = false;
+        completedNoteEl.textContent = `You've completed ${doneCount} of ${diffs.length} difficulties today.`;
+      } else {
+        completedNoteEl.hidden = true;
+      }
     } else {
-      completedNoteEl.hidden = true;
-      playBtn.textContent = 'Play';
+      difficultyRowEl.hidden = true;
+      playBtn.hidden = false;
+
+      const alreadyDone = window.PuzlDaily && window.PuzlDaily.getState(route);
+      if(alreadyDone){
+        completedNoteEl.hidden = false;
+        completedNoteEl.textContent = `You've already completed today's ${name}.`;
+        playBtn.textContent = 'Revisit';
+      } else {
+        completedNoteEl.hidden = true;
+        playBtn.textContent = 'Play';
+      }
     }
 
     if(closeTimer){ clearTimeout(closeTimer); closeTimer = null; }
@@ -1857,12 +2325,32 @@ window.PuzlDaily = (function(){
    today's puzzle has already been played.
    ========================================================= */
 window.PuzlHome = (function(){
-  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook'];
+  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor', 'tessellate'];
 
   function refresh(){
     GAME_IDS.forEach(id => {
       const badge = document.getElementById('badge-' + id);
       if(!badge) return;
+
+      const card = badge.closest('[data-preview]');
+      const difficultiesAttr = card && card.dataset.difficulties;
+
+      if(difficultiesAttr){
+        const diffs = difficultiesAttr.split(',');
+        const doneCount = diffs.filter(d => window.PuzlDaily.getState(id + '-' + d)).length;
+        if(doneCount === diffs.length){
+          badge.textContent = '\u2713 Played today';
+          badge.classList.add('played-pill');
+        } else if(doneCount > 0){
+          badge.textContent = `${doneCount}/${diffs.length} played today`;
+          badge.classList.add('played-pill');
+        } else {
+          badge.textContent = badge.dataset.category;
+          badge.classList.remove('played-pill');
+        }
+        return;
+      }
+
       const state = window.PuzlDaily.getState(id);
       if(state){
         badge.textContent = '\u2713 Played today';
@@ -3258,6 +3746,7 @@ window.MohsGame = (function(){
   const bannerSummaryEl = document.getElementById('mohs-played-summary');
   const livesEl = document.getElementById('mohs-lives');
   const listEl = document.getElementById('mohs-list');
+  const dragHintEl = document.getElementById('mohs-drag-hint');
   const feedbackEl = document.getElementById('mohs-feedback');
   const confirmBtn = document.getElementById('mohs-confirm-btn');
   const modalEl = document.getElementById('mohs-result-modal');
@@ -3271,62 +3760,93 @@ window.MohsGame = (function(){
     livesEl.innerHTML = out;
   }
 
-  function moveItem(pos, dir){
-    const target = pos + dir;
-    if(target < 0 || target >= order.length) return;
-    const tmp = order[pos];
-    order[pos] = order[target];
-    order[target] = tmp;
+  let dragPos = null;
+  let dragOverPos = null;
+
+  function swapPositions(a, b){
+    if(a === b) return;
+    const tmp = order[a];
+    order[a] = order[b];
+    order[b] = tmp;
     renderList();
+  }
+
+  function tileAtPoint(x, y){
+    const el = document.elementFromPoint(x, y);
+    if(!el) return null;
+    const tile = el.closest('.mohs-tile');
+    if(!tile || tile.parentElement !== listEl) return null;
+    return tile;
+  }
+
+  function onTilePointerDown(e, pos){
+    if(readOnly || gameOver) return;
+    dragPos = pos;
+    dragOverPos = null;
+    const tile = e.currentTarget;
+    tile.classList.add('dragging');
+    tile.setPointerCapture(e.pointerId);
+  }
+
+  function onTilePointerMove(e){
+    if(dragPos === null) return;
+    const tile = tileAtPoint(e.clientX, e.clientY);
+    listEl.querySelectorAll('.mohs-tile').forEach(t => t.classList.remove('drag-over'));
+    if(tile){
+      const pos = Number(tile.dataset.pos);
+      if(pos !== dragPos){
+        dragOverPos = pos;
+        tile.classList.add('drag-over');
+      } else {
+        dragOverPos = null;
+      }
+    } else {
+      dragOverPos = null;
+    }
+  }
+
+  function onTilePointerUp(e){
+    if(dragPos === null) return;
+    const fromPos = dragPos;
+    const toPos = dragOverPos;
+    dragPos = null;
+    dragOverPos = null;
+    listEl.querySelectorAll('.mohs-tile').forEach(t => { t.classList.remove('dragging'); t.classList.remove('drag-over'); });
+    if(toPos !== null){
+      swapPositions(fromPos, toPos);
+    }
   }
 
   function renderList(){
     listEl.innerHTML = '';
     order.forEach((itemIndex, pos) => {
       const item = PUZZLE.items[itemIndex];
-      const row = document.createElement('div');
-      row.className = 'mohs-item';
+      const tile = document.createElement('div');
+      tile.className = 'mohs-tile' + (readOnly ? ' correct readonly' : '');
+      tile.dataset.pos = pos;
+      tile.setAttribute('draggable', 'false');
 
       const rank = document.createElement('div');
       rank.className = 'mohs-rank';
       rank.textContent = pos + 1;
-      row.appendChild(rank);
+      tile.appendChild(rank);
 
       const name = document.createElement('div');
       name.className = 'mohs-name';
       name.textContent = item.name;
-      row.appendChild(name);
+      tile.appendChild(name);
 
       if(!readOnly){
-        const arrows = document.createElement('div');
-        arrows.className = 'mohs-arrows';
-
-        const upBtn = document.createElement('button');
-        upBtn.type = 'button';
-        upBtn.className = 'mohs-arrow-btn';
-        upBtn.textContent = '\u25b2';
-        upBtn.setAttribute('aria-label', 'Move ' + item.name + ' up');
-        upBtn.disabled = pos === 0;
-        upBtn.addEventListener('click', () => moveItem(pos, -1));
-        arrows.appendChild(upBtn);
-
-        const downBtn = document.createElement('button');
-        downBtn.type = 'button';
-        downBtn.className = 'mohs-arrow-btn';
-        downBtn.textContent = '\u25bc';
-        downBtn.setAttribute('aria-label', 'Move ' + item.name + ' down');
-        downBtn.disabled = pos === order.length - 1;
-        downBtn.addEventListener('click', () => moveItem(pos, 1));
-        arrows.appendChild(downBtn);
-
-        row.appendChild(arrows);
-      } else {
-        row.classList.add('correct');
+        tile.addEventListener('pointerdown', e => onTilePointerDown(e, pos));
+        tile.addEventListener('pointermove', onTilePointerMove);
+        tile.addEventListener('pointerup', onTilePointerUp);
+        tile.addEventListener('pointercancel', onTilePointerUp);
       }
 
-      listEl.appendChild(row);
+      listEl.appendChild(tile);
     });
   }
+
 
   function showFeedback(msg, type){
     feedbackEl.textContent = msg;
@@ -3355,13 +3875,14 @@ window.MohsGame = (function(){
 
   function endGame(won){
     gameOver = true;
+    readOnly = true;
     confirmBtn.disabled = true;
+    dragHintEl.style.display = 'none';
     if(!won){
       // reveal the correct order
       order = PUZZLE.items.map((item, i) => i);
-      readOnly = true;
-      renderList();
     }
+    renderList();
     modalEl.hidden = false;
     let summary;
     if(won){
@@ -3391,6 +3912,7 @@ window.MohsGame = (function(){
       renderLives();
       showFeedback('', '');
       confirmBtn.disabled = true;
+      dragHintEl.style.display = 'none';
       bannerEl.hidden = false;
       bannerSummaryEl.textContent = state.summary || '';
     } else {
@@ -3401,6 +3923,7 @@ window.MohsGame = (function(){
       renderLives();
       showFeedback('', '');
       confirmBtn.disabled = false;
+      dragHintEl.style.display = '';
       bannerEl.hidden = true;
     }
   }
@@ -4018,6 +4541,482 @@ window.RulebookGame = (function(){
     confirmSubmitBtn.addEventListener('click', submitFinalGuess);
 
     document.getElementById('rb-info-btn').addEventListener('click', () => {
+      instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  return { init };
+})();
+</script>
+
+<script>
+/* =========================================================
+   FEAR FACTOR — game logic
+   FEARFACTOR_PUZZLES holds the full daily rotation; each entry
+   has an easy/medium/expert phobia. Today's set is picked by
+   PuzlDaily.dayIndex(). Each difficulty is tracked as its own
+   independent daily result ("fearfactor-easy" etc as the storage
+   key), matching the routes used by the home screen's 3 buttons.
+   Answer matching is deliberately lenient (partial/substring
+   matches count) since this is a hit-or-miss guessing game with
+   no hints — being overly strict about exact phrasing would be
+   frustrating rather than fun.
+   ========================================================= */
+window.FearFactorGame = (function(){
+  const FEARFACTOR_PUZZLES = [
+    {
+      easy:   { phobia: "Arachnophobia", answers: ["spiders", "spider"] },
+      medium: { phobia: "Coulrophobia",  answers: ["clowns", "clown"] },
+      expert: { phobia: "Pogonophobia",  answers: ["beards", "beard", "facial hair"] }
+    },
+    {
+      easy:   { phobia: "Acrophobia",    answers: ["heights", "height"] },
+      medium: { phobia: "Trypanophobia", answers: ["needles", "needle", "injections", "injection", "shots", "shot"] },
+      expert: { phobia: "Xanthophobia",  answers: ["the color yellow", "color yellow", "yellow"] }
+    },
+    {
+      easy:   { phobia: "Claustrophobia", answers: ["enclosed spaces", "small spaces", "tight spaces", "confined spaces", "being enclosed", "closed spaces"] },
+      medium: { phobia: "Nyctophobia",    answers: ["the dark", "darkness", "night", "nighttime"] },
+      expert: { phobia: "Arachibutyrophobia", answers: ["peanut butter sticking to the roof of your mouth", "peanut butter sticking to the mouth", "peanut butter"] }
+    },
+    {
+      easy:   { phobia: "Aquaphobia",    answers: ["water"] },
+      medium: { phobia: "Ornithophobia", answers: ["birds", "bird"] },
+      expert: { phobia: "Hippopotomonstrosesquippedaliophobia", answers: ["long words", "big words", "long word"] }
+    },
+    {
+      easy:   { phobia: "Agoraphobia",    answers: ["open spaces", "crowded places", "public places", "crowds"] },
+      medium: { phobia: "Entomophobia",   answers: ["insects", "bugs", "insect", "bug"] },
+      expert: { phobia: "Triskaidekaphobia", answers: ["the number 13", "number 13", "thirteen", "13"] }
+    }
+  ];
+
+  const MAX_GUESSES = 3;
+  const DIFFICULTY_LABELS = { easy: "Easy", medium: "Medium", expert: "Expert" };
+
+  let difficulty = 'easy';
+  let PUZZLE = null;
+  let guesses = [];
+  let readOnly = false;
+  let gameOver = false;
+  let listenersBound = false;
+
+  const badgeEl = document.getElementById('ff-difficulty-badge');
+  const bannerEl = document.getElementById('ff-played-banner');
+  const bannerSummaryEl = document.getElementById('ff-played-summary');
+  const livesEl = document.getElementById('ff-lives');
+  const phobiaNameEl = document.getElementById('ff-phobia-name');
+  const inputEl = document.getElementById('ff-input');
+  const submitBtn = document.getElementById('ff-submit');
+  const feedbackEl = document.getElementById('ff-feedback');
+  const historyEl = document.getElementById('ff-guess-history');
+  const modalEl = document.getElementById('ff-result-modal');
+  const resultTitle = document.getElementById('ff-result-title');
+  const resultText = document.getElementById('ff-result-text');
+  const instructionsBox = document.getElementById('ff-instructions-box');
+
+  function stateKey(){ return 'fearfactor-' + difficulty; }
+
+  function isMatch(guessRaw, answers){
+    const g = guessRaw.trim().toLowerCase();
+    const isNumeric = /^[0-9]+$/.test(g);
+    if(!isNumeric && g.length < 3) return false;
+    return answers.some(ans => {
+      if(g === ans) return true;
+      if(ans.includes(g) && (isNumeric || g.length >= 4)) return true;
+      if(g.includes(ans) && ans.length >= 3) return true;
+      return false;
+    });
+  }
+
+  function renderLives(lives){
+    let out = '';
+    for(let i = 0; i < MAX_GUESSES; i++) out += i < lives ? '&#9679;' : '<span class="lost">&#9679;</span>';
+    livesEl.innerHTML = out;
+  }
+
+  function renderHistory(){
+    historyEl.innerHTML = '';
+    guesses.forEach(g => {
+      const chip = document.createElement('div');
+      chip.className = 'ff-guess-chip';
+      chip.textContent = g;
+      historyEl.appendChild(chip);
+    });
+  }
+
+  function showFeedback(msg, type){
+    feedbackEl.textContent = msg;
+    feedbackEl.className = 'ff-feedback' + (type ? ' ' + type : '');
+  }
+
+  function shakeInput(){
+    inputEl.classList.remove('invalid');
+    void inputEl.offsetWidth;
+    inputEl.classList.add('invalid');
+  }
+
+  function submitGuess(){
+    const raw = inputEl.value.trim();
+    if(!raw) return;
+
+    if(isMatch(raw, PUZZLE.answers)){
+      inputEl.value = '';
+      endGame(true, raw);
+      return;
+    }
+
+    guesses.push(raw);
+    renderHistory();
+    const remaining = MAX_GUESSES - guesses.length;
+    renderLives(remaining);
+    shakeInput();
+
+    if(remaining <= 0){
+      showFeedback('Out of guesses.', 'bad');
+      setTimeout(() => endGame(false, raw), 400);
+    } else {
+      showFeedback(`Not it — ${remaining} ${remaining === 1 ? 'guess' : 'guesses'} left.`, 'bad');
+    }
+    inputEl.value = '';
+  }
+
+  function endGame(won, lastGuess){
+    modalEl.hidden = false;
+    let summary;
+    if(won){
+      resultTitle.textContent = "Nailed it!";
+      summary = `${PUZZLE.phobia} is the fear of ${PUZZLE.answers[0]} — you got it in ${guesses.length + 1} guess${guesses.length === 0 ? '' : 'es'}.`;
+    } else {
+      resultTitle.textContent = "Out of guesses";
+      summary = `${PUZZLE.phobia} is the fear of ${PUZZLE.answers[0]}.`;
+    }
+    resultText.textContent = summary;
+    window.PuzlDaily.setState(stateKey(), { won, summary, guesses: guesses.slice() });
+  }
+
+  function init(requestedDifficulty){
+    bindListenersOnce();
+    difficulty = ['easy', 'medium', 'expert'].includes(requestedDifficulty) ? requestedDifficulty : 'easy';
+    badgeEl.textContent = DIFFICULTY_LABELS[difficulty];
+
+    const dayPuzzleSet = FEARFACTOR_PUZZLES[window.PuzlDaily.dayIndex(FEARFACTOR_PUZZLES.length)];
+    PUZZLE = dayPuzzleSet[difficulty];
+    phobiaNameEl.textContent = PUZZLE.phobia;
+    modalEl.hidden = true;
+
+    const state = window.PuzlDaily.getState(stateKey());
+    readOnly = !!state;
+
+    if(readOnly){
+      guesses = state.guesses || [];
+      gameOver = true;
+      renderHistory();
+      renderLives(0);
+      showFeedback('', '');
+      inputEl.value = PUZZLE.answers[0];
+      inputEl.disabled = true;
+      submitBtn.disabled = true;
+      bannerEl.hidden = false;
+      bannerSummaryEl.textContent = state.summary || '';
+    } else {
+      guesses = [];
+      gameOver = false;
+      renderHistory();
+      renderLives(MAX_GUESSES);
+      showFeedback('', '');
+      inputEl.value = '';
+      inputEl.disabled = false;
+      submitBtn.disabled = false;
+      bannerEl.hidden = true;
+    }
+  }
+
+  function bindListenersOnce(){
+    if(listenersBound) return;
+    listenersBound = true;
+
+    inputEl.addEventListener('keydown', e => { if(e.key === 'Enter') submitGuess(); });
+    submitBtn.addEventListener('click', submitGuess);
+
+    document.getElementById('ff-info-btn').addEventListener('click', () => {
+      instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  return { init };
+})();
+</script>
+
+<script>
+/* =========================================================
+   TESSELLATE — game logic
+   A timed, skill-based round game rather than a knowledge
+   puzzle, so unlike the other games its round-by-round content
+   is generated live (not from a fixed daily data set) — only
+   the once-per-day play restriction and final result are shared
+   with the rest of the site. Each round shows 16 tiles, 15
+   sharing one pattern and 1 "odd" tile that differs by exactly
+   one visual trait. The trait used gets subtler as more odd
+   tiles are found, via 4 difficulty tiers.
+   ========================================================= */
+window.TessellateGame = (function(){
+  const TOTAL_TARGET = 10;
+  const START_SECONDS = 90;
+  const WRONG_PENALTY = 5;
+  const SHAPES = ['circle', 'square', 'triangle', 'diamond'];
+  const COLORS = ['#E8503D', '#1FA971', '#3C7DFF', '#F5B700', '#8E3B46', '#6B4FDE', '#0FA3B1', '#C9A227'];
+
+  let found = 0;
+  let timeLeft = START_SECONDS;
+  let currentRound = null; // { tiles: [...16 patterns], oddIndex }
+  let timerId = null;
+  let phase = 'idle'; // 'idle' | 'playing' | 'ended'
+  let readOnly = false;
+  let listenersBound = false;
+
+  const bannerEl = document.getElementById('tess-played-banner');
+  const bannerSummaryEl = document.getElementById('tess-played-summary');
+  const timerEl = document.getElementById('tess-timer');
+  const startWrapEl = document.getElementById('tess-start-wrap');
+  const startBtn = document.getElementById('tess-start-btn');
+  const activeAreaEl = document.getElementById('tess-active-area');
+  const foundCountEl = document.getElementById('tess-found-count');
+  const gridEl = document.getElementById('tess-grid');
+  const feedbackEl = document.getElementById('tess-feedback');
+  const modalEl = document.getElementById('tess-result-modal');
+  const resultTitle = document.getElementById('tess-result-title');
+  const resultText = document.getElementById('tess-result-text');
+  const instructionsBox = document.getElementById('tess-instructions-box');
+
+  function randomChoice(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function shadeColor(hex, percent){
+    hex = hex.replace('#', '');
+    let r = parseInt(hex.substring(0, 2), 16);
+    let g = parseInt(hex.substring(2, 4), 16);
+    let b = parseInt(hex.substring(4, 6), 16);
+    r = Math.min(255, Math.max(0, Math.round(r + (percent / 100) * 255)));
+    g = Math.min(255, Math.max(0, Math.round(g + (percent / 100) * 255)));
+    b = Math.min(255, Math.max(0, Math.round(b + (percent / 100) * 255)));
+    return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+
+  function tierForFoundCount(f){
+    if(f < 3) return 0;
+    if(f < 6) return 1;
+    if(f < 8) return 2;
+    return 3;
+  }
+
+  function generateRound(){
+    const tier = tierForFoundCount(found);
+    const baseShape = randomChoice(SHAPES);
+    const baseColor = randomChoice(COLORS);
+    const baseRotation = Math.floor(Math.random() * 360);
+    const base = { shape: baseShape, color: baseColor, rotation: baseRotation, size: 1 };
+
+    const odd = Object.assign({}, base);
+    if(tier === 0){
+      odd.shape = randomChoice(SHAPES.filter(s => s !== baseShape));
+    } else if(tier === 1){
+      odd.color = randomChoice(COLORS.filter(c => c !== baseColor));
+    } else if(tier === 2){
+      const delta = 30 + Math.floor(Math.random() * 21);
+      odd.rotation = (baseRotation + delta) % 360;
+    } else {
+      const variant = randomChoice(['rotation', 'size', 'shade']);
+      if(variant === 'rotation'){
+        const delta = 12 + Math.floor(Math.random() * 7);
+        odd.rotation = (baseRotation + delta) % 360;
+      } else if(variant === 'size'){
+        odd.size = 0.8;
+      } else {
+        odd.color = shadeColor(baseColor, Math.random() < 0.5 ? -18 : 18);
+      }
+    }
+
+    const oddIndex = Math.floor(Math.random() * 16);
+    const tiles = [];
+    for(let i = 0; i < 16; i++) tiles.push(i === oddIndex ? odd : Object.assign({}, base));
+    currentRound = { tiles, oddIndex };
+  }
+
+  function shapeMarkup(pattern){
+    switch(pattern.shape){
+      case 'circle': return '<circle cx="50" cy="50" r="30"/>';
+      case 'square': return '<rect x="20" y="20" width="60" height="60" rx="6"/>';
+      case 'triangle': return '<polygon points="50,15 85,80 15,80"/>';
+      case 'diamond': return '<polygon points="50,12 88,50 50,88 12,50"/>';
+      default: return '<circle cx="50" cy="50" r="30"/>';
+    }
+  }
+
+  function tileSVG(pattern){
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">`
+      + `<g transform="translate(50 50) rotate(${pattern.rotation}) scale(${pattern.size}) translate(-50 -50)" fill="${pattern.color}">`
+      + shapeMarkup(pattern)
+      + `</g></svg>`;
+  }
+
+  function formatTime(seconds){
+    const s = Math.max(0, seconds);
+    const m = Math.floor(s / 60);
+    const rem = s % 60;
+    return m + ':' + String(rem).padStart(2, '0');
+  }
+
+  function renderTimer(){
+    timerEl.textContent = formatTime(timeLeft);
+    timerEl.classList.toggle('low', timeLeft <= 15);
+  }
+
+  function renderFoundCount(){
+    foundCountEl.textContent = found;
+  }
+
+  function showFeedback(msg, type){
+    feedbackEl.textContent = msg;
+    feedbackEl.className = 'tess-feedback' + (type ? ' ' + type : '');
+  }
+
+  function renderGrid(){
+    gridEl.innerHTML = '';
+    currentRound.tiles.forEach((pattern, i) => {
+      const tile = document.createElement('div');
+      tile.className = 'tess-tile';
+      tile.innerHTML = tileSVG(pattern);
+      tile.addEventListener('click', () => onTileClick(i, tile));
+      gridEl.appendChild(tile);
+    });
+  }
+
+  function disableGrid(){
+    gridEl.querySelectorAll('.tess-tile').forEach(t => t.classList.add('tess-disabled'));
+  }
+
+  function onTileClick(index, tileEl){
+    if(phase !== 'playing') return;
+    if(index === currentRound.oddIndex){
+      tileEl.classList.add('correct-flash');
+      disableGrid();
+      found++;
+      renderFoundCount();
+      showFeedback('Found it!', 'ok');
+      if(found >= TOTAL_TARGET){
+        setTimeout(() => endGame(true), 250);
+      } else {
+        setTimeout(() => {
+          generateRound();
+          renderGrid();
+          showFeedback('', '');
+        }, 250);
+      }
+    } else {
+      tileEl.classList.add('wrong-flash');
+      setTimeout(() => tileEl.classList.remove('wrong-flash'), 300);
+      timeLeft = Math.max(0, timeLeft - WRONG_PENALTY);
+      renderTimer();
+      showFeedback(`Not it \u2014 -${WRONG_PENALTY}s`, 'bad');
+      if(timeLeft <= 0){
+        endGame(false);
+      }
+    }
+  }
+
+  function stopTimer(){
+    if(timerId){ clearInterval(timerId); timerId = null; }
+  }
+
+  function startTimer(){
+    stopTimer();
+    timerId = setInterval(() => {
+      const viewEl = document.getElementById('view-tessellate');
+      if(!viewEl || !viewEl.classList.contains('active')){
+        stopTimer();
+        return;
+      }
+      timeLeft -= 1;
+      if(timeLeft <= 0){
+        timeLeft = 0;
+        renderTimer();
+        stopTimer();
+        endGame(false);
+        return;
+      }
+      renderTimer();
+    }, 1000);
+  }
+
+  function startGame(){
+    if(readOnly) return;
+    found = 0;
+    timeLeft = START_SECONDS;
+    phase = 'playing';
+    startWrapEl.hidden = true;
+    activeAreaEl.hidden = false;
+    renderFoundCount();
+    renderTimer();
+    showFeedback('', '');
+    generateRound();
+    renderGrid();
+    startTimer();
+  }
+
+  function endGame(won){
+    phase = 'ended';
+    stopTimer();
+    disableGrid();
+    modalEl.hidden = false;
+    let summary;
+    if(won){
+      resultTitle.textContent = "All 10 found!";
+      summary = `You found all 10 odd tiles with ${formatTime(timeLeft)} left on the clock.`;
+    } else {
+      resultTitle.textContent = "Out of time";
+      summary = `You found ${found} of 10 odd tiles before running out of time.`;
+    }
+    resultText.textContent = summary;
+    window.PuzlDaily.setState('tessellate', { won, summary, found, timeLeft });
+  }
+
+  function init(){
+    bindListenersOnce();
+    stopTimer();
+    phase = 'idle';
+    modalEl.hidden = true;
+    showFeedback('', '');
+
+    const state = window.PuzlDaily.getState('tessellate');
+    readOnly = !!state;
+
+    if(readOnly){
+      found = state.found || 0;
+      timeLeft = typeof state.timeLeft === 'number' ? state.timeLeft : 0;
+      renderFoundCount();
+      renderTimer();
+      startWrapEl.hidden = true;
+      activeAreaEl.hidden = true;
+      bannerEl.hidden = false;
+      bannerSummaryEl.textContent = state.summary || '';
+    } else {
+      found = 0;
+      timeLeft = START_SECONDS;
+      renderFoundCount();
+      renderTimer();
+      startWrapEl.hidden = false;
+      activeAreaEl.hidden = true;
+      bannerEl.hidden = true;
+    }
+  }
+
+  function bindListenersOnce(){
+    if(listenersBound) return;
+    listenersBound = true;
+
+    startBtn.addEventListener('click', startGame);
+
+    document.getElementById('tess-info-btn').addEventListener('click', () => {
       instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
     });
   }
