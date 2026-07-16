@@ -87,6 +87,14 @@
   --tessellate-dark: #5A8712;
   --tessellate-tint: #EEF6DC;
 
+  --chopsticks:      #5B7A99;
+  --chopsticks-dark: #435C77;
+  --chopsticks-tint: #E6ECF2;
+
+  --halves:      #A6266F;
+  --halves-dark: #7D1D54;
+  --halves-tint: #F7E3EE;
+
   --danger:     #E8503D;
   --danger-tint:#FDE7E4;
   --success:    #1FA971;
@@ -116,6 +124,14 @@ html[data-theme="dark"]{
 }
 
 *, *::before, *::after{ box-sizing:border-box; }
+
+/* Global safety net: without this, any element whose class sets its own
+   `display` (flex, grid, inline-flex, etc.) will visually ignore the
+   `hidden` attribute, since an author rule of equal specificity beats
+   the browser's default [hidden]{display:none}. This makes el.hidden
+   reliably work everywhere in the site, regardless of what else is
+   styling that element. */
+[hidden]{ display:none !important; }
 
 html, body{
   margin:0;
@@ -299,7 +315,7 @@ html[data-layout="grid"] .game-chevron{ display:none; }
   font-size:13px; color:var(--ink-soft); margin-bottom:4px;
 }
 
-.preview-difficulty-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.preview-difficulty-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:18px; }
 .preview-diff-btn{
   display:inline-flex; align-items:center; justify-content:center; padding:11px 18px;
   border-radius:999px; font-weight:600; font-size:14px; background:var(--ink); color:#fff;
@@ -917,6 +933,114 @@ html[data-layout="grid"] .game-chevron{ display:none; }
 
 .tess-feedback{ text-align:center; font-size:13px; color:var(--ink-soft); min-height:18px; margin-bottom:6px; }
 .tess-feedback.bad{ color:var(--danger); font-weight:600; }
+
+/* =========================================================
+   CHOPSTICKS
+   ========================================================= */
+
+.chop-intro{ text-align:center; font-size:13.5px; color:var(--ink-soft); margin:6px 0 20px; line-height:1.5; }
+
+.chop-word-grid{
+  display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:18px;
+}
+.chop-word-btn{
+  background:var(--surface); border:2px solid var(--line); border-radius:999px;
+  padding:12px 20px; font-weight:700; font-size:15px; color:var(--ink);
+  transition:border-color 0.15s ease, background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
+}
+.chop-word-btn:hover:not(:disabled){ transform:translateY(-1px); border-color:var(--chopsticks); }
+.chop-word-btn.wrong{
+  border-color:var(--danger); background:var(--danger-tint); color:var(--danger);
+  text-decoration:line-through; opacity:0.7;
+}
+.chop-word-btn.correct{ border-color:var(--success); background:var(--deco-tint); color:var(--success); }
+.chop-word-btn:disabled{ cursor:default; }
+
+.chop-feedback{ text-align:center; font-size:13.5px; color:var(--ink-soft); min-height:20px; margin-bottom:18px; }
+.chop-feedback.bad{ color:var(--danger); font-weight:600; }
+.chop-feedback.ok{ color:var(--success); font-weight:600; }
+
+.chop-reveal-box{
+  background:var(--chopsticks-tint); border-radius:var(--radius-md); padding:16px; margin-top:auto; text-align:center;
+}
+.chop-reveal-box .label{
+  font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--chopsticks-dark); margin-bottom:6px;
+}
+.chop-reveal-box .category-text{ font-weight:700; color:var(--ink); font-size:14.5px; line-height:1.4; }
+
+/* =========================================================
+   HALVES
+   ========================================================= */
+
+.halves-shape-wrap{ display:flex; justify-content:center; margin:6px 0 22px; }
+.halves-shape-wrap svg{ width:100%; max-width:260px; height:auto; display:block; }
+.halves-shape-fill{ fill:var(--halves-tint); stroke:var(--halves); stroke-width:3; stroke-linejoin:round; }
+.halves-cut-line{ stroke:var(--ink); stroke-width:2; stroke-dasharray:6 5; }
+.halves-cut-line.locked{ stroke:var(--halves-dark); stroke-dasharray:none; stroke-width:2.5; }
+.halves-side-a{ fill:var(--halves); fill-opacity:0.55; }
+.halves-side-b{ fill:var(--ink); fill-opacity:0.28; }
+
+.halves-controls{
+  display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start;
+  max-width:320px; margin:0 auto 20px;
+}
+
+.halves-dial-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+.halves-dial-label{
+  font-family:'IBM Plex Mono', monospace; font-size:10px; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--ink-faint);
+}
+.halves-dial{
+  width:96px; height:96px; border-radius:50%; background:var(--surface);
+  border:2px solid var(--line); position:relative; cursor:pointer; touch-action:none; flex:0 0 auto;
+}
+.halves-dial-handle{
+  position:absolute; width:16px; height:16px; border-radius:50%; background:var(--halves);
+  border:2px solid #fff; box-shadow:var(--shadow-sm); transform:translate(-50%,-50%);
+  pointer-events:none; left:50%; top:0%;
+}
+.halves-dial-center{
+  position:absolute; top:50%; left:50%; width:6px; height:6px; border-radius:50%;
+  background:var(--ink-faint); transform:translate(-50%,-50%); pointer-events:none;
+}
+
+.halves-xy-wrap{ display:flex; flex-direction:column; justify-content:center; gap:16px; height:100%; }
+.halves-slider-label{
+  font-family:'IBM Plex Mono', monospace; font-size:10px; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--ink-faint); margin-bottom:6px; display:block;
+}
+.halves-slider{
+  width:100%; -webkit-appearance:none; appearance:none; height:10px; border-radius:999px;
+  background:var(--line); outline:none; cursor:pointer;
+}
+.halves-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+  background:var(--halves); border:3px solid #fff; box-shadow:var(--shadow-sm); cursor:pointer;
+}
+.halves-slider::-moz-range-thumb{
+  width:20px; height:20px; border-radius:50%; background:var(--halves); border:3px solid #fff;
+  box-shadow:var(--shadow-sm); cursor:pointer;
+}
+.halves-slider:disabled{ opacity:0.5; }
+
+.halves-confirm-row{ text-align:center; margin-top:auto; padding-top:6px; margin-bottom:14px; }
+.halves-confirm-btn{
+  padding:13px 30px; border-radius:999px; background:var(--halves); color:#fff; font-weight:700; font-size:15px;
+}
+.halves-confirm-btn:hover{ background:var(--halves-dark); }
+.halves-confirm-btn:disabled{ opacity:0.5; cursor:default; }
+
+.halves-hint{ text-align:center; font-size:12.5px; color:var(--ink-faint); margin-bottom:6px; }
+
+.halves-result-box{
+  background:var(--halves-tint); border-radius:var(--radius-md); padding:16px; margin-top:auto; text-align:center;
+}
+.halves-result-box .label{
+  font-family:'IBM Plex Mono', monospace; font-size:10.5px; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--halves-dark); margin-bottom:6px;
+}
+.halves-result-box .split-text{ font-weight:700; color:var(--ink); font-size:16px; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -1152,6 +1276,43 @@ html[data-layout="grid"] .game-chevron{ display:none; }
             <div class="game-name">Tessellate</div>
             <div class="game-phrase">A high-speed game about ruling out design tiles.</div>
             <span class="game-badge" id="badge-tessellate" data-category="Logic">Logic</span>
+          </div>
+          <div class="game-chevron">&rsaquo;</div>
+        </button>
+      </li>
+      <li>
+        <button class="game-card" data-preview="chopsticks">
+          <div class="game-icon">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" fill="var(--chopsticks)"/>
+              <rect x="6" y="17" width="12" height="14" rx="2" fill="#fff"/>
+              <rect x="18" y="17" width="12" height="14" rx="2" fill="#fff" opacity="0.5"/>
+              <line x1="20" y1="19" x2="28" y2="29" stroke="var(--chopsticks)" stroke-width="2"/>
+              <line x1="28" y1="19" x2="20" y2="29" stroke="var(--chopsticks)" stroke-width="2"/>
+              <rect x="30" y="17" width="12" height="14" rx="2" fill="#fff"/>
+            </svg>
+          </div>
+          <div class="game-info">
+            <div class="game-name">Chopsticks</div>
+            <div class="game-phrase">Remove the odd one out from the mystery category.</div>
+            <span class="game-badge" id="badge-chopsticks" data-category="Logic">Logic</span>
+          </div>
+          <div class="game-chevron">&rsaquo;</div>
+        </button>
+      </li>
+      <li>
+        <button class="game-card" data-preview="halves">
+          <div class="game-icon">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" fill="var(--halves)"/>
+              <path d="M24 8 C34 8 40 16 40 24 C40 34 32 40 22 39 C14 38 8 30 9 22 C10 14 16 8 24 8 Z" fill="#fff" opacity="0.9"/>
+              <line x1="24" y1="6" x2="24" y2="42" stroke="var(--halves)" stroke-width="2.5" stroke-dasharray="3 3"/>
+            </svg>
+          </div>
+          <div class="game-info">
+            <div class="game-name">Halves</div>
+            <div class="game-phrase">Cut the irregular shape as close to half as possible.</div>
+            <span class="game-badge" id="badge-halves" data-category="Logic">Logic</span>
           </div>
           <div class="game-chevron">&rsaquo;</div>
         </button>
@@ -1948,13 +2109,13 @@ html[data-layout="grid"] .game-chevron{ display:none; }
       </div>
       <div class="mistakes-wrap">
         <span class="mistakes-label">Time Left</span>
-        <div class="lives mono tess-timer-value" id="tess-timer">1:30</div>
+        <div class="lives mono tess-timer-value" id="tess-timer">1:00</div>
       </div>
       <button class="info-btn" id="tess-info-btn" aria-label="Show instructions">i</button>
     </div>
 
     <div class="instructions-box" id="tess-instructions-box">
-      <strong>How to play:</strong> Each round, 16 tiles appear and exactly one of them doesn't match the rest — find it and tap it. Get one right and the whole board changes to a new pattern, a little trickier than the last. You need to find 10 odd tiles to win, and you're working against the clock: you start with 1:30, and every wrong tap costs you 5 seconds instantly. No pauses, no do-overs — just fast eyes and a steady hand. One attempt per day.
+      <strong>How to play:</strong> Each round, 16 tiles appear and exactly one of them doesn't match the rest — find it and tap it. Get one right and the whole board changes to a new pattern, a little trickier than the last. The differences get subtle fast. You need to find 10 odd tiles to win, and you're working against the clock: you start with just 1:00, and every wrong tap costs you 7 seconds instantly. No pauses, no do-overs — just fast eyes and a steady hand. One attempt per day.
     </div>
 
     <div id="tess-playarea">
@@ -1963,7 +2124,7 @@ html[data-layout="grid"] .game-chevron{ display:none; }
       </div>
 
       <div class="tess-start-wrap" id="tess-start-wrap">
-        <p>Find 10 odd tiles before the clock runs out. Every wrong tap costs 5 seconds.</p>
+        <p>Find 10 odd tiles before the clock runs out. Every wrong tap costs 7 seconds — and the differences get harder to spot fast.</p>
         <button class="tess-start-btn" id="tess-start-btn">Start</button>
       </div>
 
@@ -1979,6 +2140,147 @@ html[data-layout="grid"] .game-chevron{ display:none; }
     <div class="modal-card">
       <h2 id="tess-result-title">All 10 found!</h2>
       <p id="tess-result-text">You cleared the board with time to spare.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-route="home">Back home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     CHOPSTICKS VIEW
+     ========================================================= -->
+<section class="view" id="view-chopsticks">
+  <div class="game-page">
+    <div class="game-topbar">
+      <button class="back-link" data-route="home" aria-label="Back to home">&larr;</button>
+      <div class="game-title-block">
+        <div class="game-title-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="var(--chopsticks)"/>
+            <rect x="6" y="17" width="12" height="14" rx="2" fill="#fff"/>
+            <rect x="18" y="17" width="12" height="14" rx="2" fill="#fff" opacity="0.5"/>
+            <line x1="20" y1="19" x2="28" y2="29" stroke="var(--chopsticks)" stroke-width="2"/>
+            <line x1="28" y1="19" x2="20" y2="29" stroke="var(--chopsticks)" stroke-width="2"/>
+            <rect x="30" y="17" width="12" height="14" rx="2" fill="#fff"/>
+          </svg>
+        </div>
+        <div class="game-title-text">
+          <h1>Chopsticks</h1>
+          <p>Remove the odd one out from the mystery category.</p>
+        </div>
+      </div>
+      <div class="mistakes-wrap">
+        <span class="mistakes-label">Mistakes</span>
+        <div class="lives mono" id="chop-lives" aria-label="Mistakes remaining">&#9679;&#9679;</div>
+      </div>
+      <button class="info-btn" id="chop-info-btn" aria-label="Show instructions">i</button>
+    </div>
+
+    <div class="instructions-box" id="chop-instructions-box">
+      <strong>How to play:</strong> You'll see a handful of words that are all connected by one secret category — except one, which doesn't belong. Your job is to find and remove that odd one out. The twist: you're never told what the category is, so don't assume the obvious connection is the real one — it might be a trap. Tap the word you think doesn't belong. Guess wrong and it costs you a mistake — you only get 2, so choose carefully. Once you find the true odd one out (or run out of mistakes), the secret category is revealed. One puzzle per day — a new one arrives at midnight.
+    </div>
+
+    <div id="chop-playarea">
+      <div class="played-banner" id="chop-played-banner" style="border-left-color:var(--chopsticks)" hidden>
+        <strong>You already played today's Chopsticks.</strong> <span id="chop-played-summary"></span> A new set unlocks at midnight — this board is just for looking.
+      </div>
+
+      <p class="chop-intro">Which word doesn't belong with the rest?</p>
+
+      <div class="chop-word-grid" id="chop-word-grid"></div>
+
+      <p class="chop-feedback" id="chop-feedback"></p>
+
+      <div class="chop-reveal-box" id="chop-reveal-box" hidden>
+        <p class="label">The secret category was</p>
+        <p class="category-text" id="chop-reveal-text"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="chop-result-modal" hidden>
+    <div class="modal-card">
+      <h2 id="chop-result-title">Found it!</h2>
+      <p id="chop-result-text">You spotted the true odd one out.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-route="home">Back home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     HALVES VIEW
+     ========================================================= -->
+<section class="view" id="view-halves">
+  <div class="game-page">
+    <div class="game-topbar">
+      <button class="back-link" data-route="home" aria-label="Back to home">&larr;</button>
+      <div class="game-title-block">
+        <div class="game-title-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="var(--halves)"/>
+            <path d="M24 8 C34 8 40 16 40 24 C40 34 32 40 22 39 C14 38 8 30 9 22 C10 14 16 8 24 8 Z" fill="#fff" opacity="0.9"/>
+            <line x1="24" y1="6" x2="24" y2="42" stroke="var(--halves)" stroke-width="2.5" stroke-dasharray="3 3"/>
+          </svg>
+        </div>
+        <div class="game-title-text">
+          <h1>Halves</h1>
+          <p>Cut the irregular shape as close to half as possible.</p>
+        </div>
+      </div>
+      <button class="info-btn" id="halves-info-btn" aria-label="Show instructions">i</button>
+    </div>
+
+    <div class="instructions-box" id="halves-instructions-box">
+      <strong>How to play:</strong> You're given an irregular shape and a dashed cut line that starts off completely above it. Adjust the line with the 3 sliders below — the round dial rotates the line, and the two straight sliders move the line's center left/right and up/down. You won't see any percentages while you adjust, only the line itself, so eyeball it carefully. When you're happy with the cut, press "Confirm Cut" — you only get one. The closer the two resulting pieces are to a 50/50 split, the better you've done. One shape per day — a new one arrives at midnight.
+    </div>
+
+    <div id="halves-playarea">
+      <div class="played-banner" id="halves-played-banner" style="border-left-color:var(--halves)" hidden>
+        <strong>You already played today's Halves.</strong> <span id="halves-played-summary"></span> A new shape unlocks at midnight — this board is just for looking.
+      </div>
+
+      <div class="halves-shape-wrap" id="halves-shape-wrap"></div>
+
+      <div class="halves-controls" id="halves-controls">
+        <div class="halves-dial-wrap">
+          <span class="halves-dial-label">Rotate</span>
+          <div class="halves-dial" id="halves-dial">
+            <div class="halves-dial-center"></div>
+            <div class="halves-dial-handle" id="halves-dial-handle"></div>
+          </div>
+        </div>
+        <div class="halves-xy-wrap">
+          <div>
+            <label class="halves-slider-label" for="halves-x-slider">Horizontal Position (X)</label>
+            <input type="range" class="halves-slider" id="halves-x-slider" min="-90" max="90" value="0">
+          </div>
+          <div>
+            <label class="halves-slider-label" for="halves-y-slider">Vertical Position (Y)</label>
+            <input type="range" class="halves-slider" id="halves-y-slider" min="-125" max="125" value="-125">
+          </div>
+        </div>
+      </div>
+
+      <p class="halves-hint" id="halves-hint">The cut line starts above the shape — drag it down and line it up yourself, then confirm. Just one try.</p>
+
+      <div class="halves-confirm-row">
+        <button class="halves-confirm-btn" id="halves-confirm-btn">Confirm Cut</button>
+      </div>
+
+      <div class="halves-result-box" id="halves-result-box" hidden>
+        <p class="label">Your cut</p>
+        <p class="split-text" id="halves-result-split"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="halves-result-modal" hidden>
+    <div class="modal-card">
+      <h2 id="halves-result-title">Nice cut!</h2>
+      <p id="halves-result-text">Your split was close to 50/50.</p>
       <div class="modal-actions">
         <button class="btn btn-ghost" data-route="home">Back home</button>
       </div>
@@ -2137,7 +2439,7 @@ window.PuzlPrefs = (function(){
    Uses the URL hash so the browser back button works too.
    ========================================================= */
 (function(){
-  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor-easy', 'fearfactor-medium', 'fearfactor-expert', 'tessellate'];
+  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor-easy', 'fearfactor-medium', 'fearfactor-expert', 'tessellate', 'chopsticks', 'halves'];
 
   function showView(name){
     // Fear Factor has 3 difficulties that all share one view section;
@@ -2162,6 +2464,8 @@ window.PuzlPrefs = (function(){
     if(name === 'rulebook' && window.RulebookGame) window.RulebookGame.init();
     if(isFearFactor && window.FearFactorGame) window.FearFactorGame.init(name.split('-')[1] || 'easy');
     if(name === 'tessellate' && window.TessellateGame) window.TessellateGame.init();
+    if(name === 'chopsticks' && window.ChopsticksGame) window.ChopsticksGame.init();
+    if(name === 'halves' && window.HalvesGame) window.HalvesGame.init();
   }
 
   function routeFromHash(){
@@ -2325,7 +2629,7 @@ window.PuzlPrefs = (function(){
    today's puzzle has already been played.
    ========================================================= */
 window.PuzlHome = (function(){
-  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor', 'tessellate'];
+  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor', 'tessellate', 'chopsticks', 'halves'];
 
   function refresh(){
     GAME_IDS.forEach(id => {
@@ -4762,9 +5066,12 @@ window.FearFactorGame = (function(){
    ========================================================= */
 window.TessellateGame = (function(){
   const TOTAL_TARGET = 10;
-  const START_SECONDS = 90;
-  const WRONG_PENALTY = 5;
+  const START_SECONDS = 60;
+  const WRONG_PENALTY = 7;
   const SHAPES = ['circle', 'square', 'triangle', 'diamond'];
+  // circles look identical at any rotation, so rounds that rely on a
+  // rotation difference must never use a circle as the base shape
+  const ROTATABLE_SHAPES = ['square', 'triangle', 'diamond'];
   const COLORS = ['#E8503D', '#1FA971', '#3C7DFF', '#F5B700', '#8E3B46', '#6B4FDE', '#0FA3B1', '#C9A227'];
 
   let found = 0;
@@ -4802,16 +5109,21 @@ window.TessellateGame = (function(){
     return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
   }
 
+  // Only the first 2 rounds are "easy" (shape/color). Everything after
+  // that relies on rotation, size, or shade — and gets progressively
+  // more subtle, with the last 3 rounds barely perceptible on purpose.
   function tierForFoundCount(f){
-    if(f < 3) return 0;
-    if(f < 6) return 1;
-    if(f < 8) return 2;
-    return 3;
+    if(f < 1) return 0;
+    if(f < 2) return 1;
+    if(f < 4) return 2;
+    if(f < 7) return 3;
+    return 4;
   }
 
   function generateRound(){
     const tier = tierForFoundCount(found);
-    const baseShape = randomChoice(SHAPES);
+    const needsRotationBase = tier === 2; // this tier is rotation-only
+    const baseShape = needsRotationBase ? randomChoice(ROTATABLE_SHAPES) : randomChoice(SHAPES);
     const baseColor = randomChoice(COLORS);
     const baseRotation = Math.floor(Math.random() * 360);
     const base = { shape: baseShape, color: baseColor, rotation: baseRotation, size: 1 };
@@ -4822,17 +5134,31 @@ window.TessellateGame = (function(){
     } else if(tier === 1){
       odd.color = randomChoice(COLORS.filter(c => c !== baseColor));
     } else if(tier === 2){
-      const delta = 30 + Math.floor(Math.random() * 21);
+      const delta = 30 + Math.floor(Math.random() * 21); // 30-50°, clearly noticeable
       odd.rotation = (baseRotation + delta) % 360;
-    } else {
-      const variant = randomChoice(['rotation', 'size', 'shade']);
+    } else if(tier === 3){
+      // moderate subtlety — never offer "rotation" if the base can't show it
+      const variantPool = baseShape === 'circle' ? ['size', 'shade'] : ['rotation', 'size', 'shade'];
+      const variant = randomChoice(variantPool);
       if(variant === 'rotation'){
-        const delta = 12 + Math.floor(Math.random() * 7);
+        const delta = 15 + Math.floor(Math.random() * 8); // 15-22°
         odd.rotation = (baseRotation + delta) % 360;
       } else if(variant === 'size'){
-        odd.size = 0.8;
+        odd.size = 0.85;
       } else {
-        odd.color = shadeColor(baseColor, Math.random() < 0.5 ? -18 : 18);
+        odd.color = shadeColor(baseColor, Math.random() < 0.5 ? -14 : 14);
+      }
+    } else {
+      // tier 4 — the hardest rounds, barely perceptible on purpose
+      const variantPool = baseShape === 'circle' ? ['size', 'shade'] : ['rotation', 'size', 'shade'];
+      const variant = randomChoice(variantPool);
+      if(variant === 'rotation'){
+        const delta = 6 + Math.floor(Math.random() * 5); // 6-10°
+        odd.rotation = (baseRotation + delta) % 360;
+      } else if(variant === 'size'){
+        odd.size = 0.88;
+      } else {
+        odd.color = shadeColor(baseColor, Math.random() < 0.5 ? -9 : 9);
       }
     }
 
@@ -5017,6 +5343,481 @@ window.TessellateGame = (function(){
     startBtn.addEventListener('click', startGame);
 
     document.getElementById('tess-info-btn').addEventListener('click', () => {
+      instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  return { init };
+})();
+</script>
+
+<script>
+/* =========================================================
+   CHOPSTICKS — game logic
+   CHOPSTICKS_PUZZLES holds the full rotation; today's entry is
+   picked by PuzlDaily.dayIndex(). Each puzzle lists its words in
+   the order to display, plus the true odd-one-out and the secret
+   category that explains it (revealed only at the end). The
+   category itself is never shown or hinted at during play.
+   ========================================================= */
+window.ChopsticksGame = (function(){
+  const CHOPSTICKS_PUZZLES = [
+    { words: ["Tomato", "Apple", "Orange", "Dragonfruit", "Banana", "Blueberry"], odd: "Blueberry", category: "Warm-colored things" },
+    { words: ["Whale", "Dolphin", "Seal", "Otter", "Manatee", "Shark"], odd: "Shark", category: "Marine mammals" },
+    { words: ["Circle", "Square", "Triangle", "Pentagon", "Hexagon", "Star"], odd: "Circle", category: "Polygons (shapes with straight sides)" },
+    { words: ["Lion", "Tiger", "Bear", "Wolf", "Fox", "Eagle"], odd: "Eagle", category: "Land mammals" },
+    { words: ["Guitar", "Piano", "Violin", "Harp", "Cello", "Drum"], odd: "Drum", category: "String instruments" }
+  ];
+
+  const MAX_MISTAKES = 2;
+
+  let PUZZLE = CHOPSTICKS_PUZZLES[0];
+  let mistakes = 0;
+  let wrongWords = [];
+  let gameOver = false;
+  let readOnly = false;
+  let listenersBound = false;
+
+  const bannerEl = document.getElementById('chop-played-banner');
+  const bannerSummaryEl = document.getElementById('chop-played-summary');
+  const livesEl = document.getElementById('chop-lives');
+  const gridEl = document.getElementById('chop-word-grid');
+  const feedbackEl = document.getElementById('chop-feedback');
+  const revealBox = document.getElementById('chop-reveal-box');
+  const revealText = document.getElementById('chop-reveal-text');
+  const modalEl = document.getElementById('chop-result-modal');
+  const resultTitle = document.getElementById('chop-result-title');
+  const resultText = document.getElementById('chop-result-text');
+  const instructionsBox = document.getElementById('chop-instructions-box');
+
+  function renderLives(){
+    const left = MAX_MISTAKES - mistakes;
+    let out = '';
+    for(let i = 0; i < MAX_MISTAKES; i++) out += i < left ? '&#9679;' : '<span class="lost">&#9679;</span>';
+    livesEl.innerHTML = out;
+  }
+
+  function showFeedback(msg, type){
+    feedbackEl.textContent = msg;
+    feedbackEl.className = 'chop-feedback' + (type ? ' ' + type : '');
+  }
+
+  function renderGrid(finalState){
+    gridEl.innerHTML = '';
+    PUZZLE.words.forEach(word => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chop-word-btn';
+      btn.textContent = word;
+
+      if(finalState){
+        if(word === PUZZLE.odd) btn.classList.add('correct');
+        else if(wrongWords.includes(word)) btn.classList.add('wrong');
+        btn.disabled = true;
+      } else {
+        if(wrongWords.includes(word)){
+          btn.classList.add('wrong');
+          btn.disabled = true;
+        } else {
+          btn.addEventListener('click', () => onWordClick(word, btn));
+        }
+      }
+      gridEl.appendChild(btn);
+    });
+  }
+
+  function onWordClick(word, btnEl){
+    if(gameOver || readOnly) return;
+
+    if(word === PUZZLE.odd){
+      btnEl.classList.add('correct');
+      btnEl.disabled = true;
+      endGame(true);
+      return;
+    }
+
+    wrongWords.push(word);
+    mistakes++;
+    renderLives();
+    btnEl.classList.add('wrong');
+    btnEl.disabled = true;
+
+    if(mistakes >= MAX_MISTAKES){
+      showFeedback('Out of mistakes.', 'bad');
+      setTimeout(() => endGame(false), 400);
+    } else {
+      const left = MAX_MISTAKES - mistakes;
+      showFeedback(`Not it \u2014 ${left} ${left === 1 ? 'mistake' : 'mistakes'} left.`, 'bad');
+    }
+  }
+
+  function endGame(won){
+    gameOver = true;
+    renderGrid(true);
+    revealBox.hidden = false;
+    revealText.textContent = PUZZLE.category;
+    modalEl.hidden = false;
+
+    let summary;
+    if(won){
+      resultTitle.textContent = "Found it!";
+      summary = `"${PUZZLE.odd}" was the odd one out \u2014 the category was "${PUZZLE.category}."`;
+      showFeedback('', '');
+    } else {
+      resultTitle.textContent = "Out of mistakes";
+      summary = `The odd one out was "${PUZZLE.odd}" \u2014 the category was "${PUZZLE.category}."`;
+    }
+    resultText.textContent = summary;
+    window.PuzlDaily.setState('chopsticks', { won, summary });
+  }
+
+  function init(){
+    bindListenersOnce();
+    PUZZLE = CHOPSTICKS_PUZZLES[window.PuzlDaily.dayIndex(CHOPSTICKS_PUZZLES.length)];
+    modalEl.hidden = true;
+
+    const state = window.PuzlDaily.getState('chopsticks');
+    readOnly = !!state;
+
+    if(readOnly){
+      mistakes = 0;
+      wrongWords = [];
+      gameOver = true;
+      renderLives();
+      renderGrid(true);
+      showFeedback('', '');
+      revealBox.hidden = false;
+      revealText.textContent = PUZZLE.category;
+      bannerEl.hidden = false;
+      bannerSummaryEl.textContent = state.summary || '';
+    } else {
+      mistakes = 0;
+      wrongWords = [];
+      gameOver = false;
+      renderLives();
+      renderGrid(false);
+      showFeedback('', '');
+      revealBox.hidden = true;
+      bannerEl.hidden = true;
+    }
+  }
+
+  function bindListenersOnce(){
+    if(listenersBound) return;
+    listenersBound = true;
+
+    document.getElementById('chop-info-btn').addEventListener('click', () => {
+      instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  return { init };
+})();
+</script>
+
+<script>
+/* =========================================================
+   HALVES — game logic
+   HALVES_PUZZLES holds 5 irregular polygon shapes (vertices
+   precomputed offline from radial harmonic formulas, so each is
+   guaranteed a simple, non-self-intersecting star-shaped polygon
+   within a 300x300 space centered at (150,150)). Today's shape is
+   picked by PuzlDaily.dayIndex(). The player positions a cut line
+   (center point + rotation) with 3 sliders; on "Confirm Cut" the
+   shape is clipped by that line (Sutherland-Hodgman style, single
+   half-plane) and the resulting two areas are compared — this is
+   the one-and-only guess, matching Rulebook's one-guess format.
+   ========================================================= */
+window.HalvesGame = (function(){
+  const HALVES_PUZZLES = [
+    { name: "blob", vertices: [[232,150],[235.2,185.3],[218.8,218.8],[186.7,238.5],[150,244.9],[112.4,240.7],[77.6,222.4],[58.7,187.8],[63.6,150],[76.5,119.6],[89.1,89.1],[113.6,62.1],[150,50.9],[187.5,59.4],[213.3,86.7],[223.7,119.5]] },
+    { name: "zigzag", vertices: [[206.8,150],[256.8,218.6],[176.7,208.6],[137.5,236.7],[99.9,207.9],[82,170],[66.6,125.5],[100,92.3],[140.2,81.7],[172.9,99.9],[202.8,116.1]] },
+    { name: "lumpy", vertices: [[262.7,150],[243,198.8],[201.2,224.2],[160.3,234.7],[118.8,232.3],[82.8,209.6],[68.4,170.1],[75.7,131.7],[93.2,99.7],[120,70.9],[161.1,58.6],[203.4,72.6],[241.1,102.2]] },
+    { name: "starlike", vertices: [[220.8,150],[235.9,222.1],[159.6,204.3],[122.2,198.1],[73.5,177.8],[64.3,118.8],[100.5,64.2],[162.2,80.6],[198.8,109]] },
+    { name: "wavy", vertices: [[243.5,150],[240.4,181],[224,207.6],[200.4,227.2],[173.2,241.7],[142.2,244.7],[112.9,234.7],[87.9,217.4],[68.1,194.3],[58.3,165.3],[59.8,134.9],[65.7,104.4],[79.9,73.8],[109.2,56.9],[142.5,59.1],[171,67.3],[197.2,77.8],[220.1,95.4],[236.2,120.4]] }
+  ];
+
+  const CENTER = { x: 150, y: 150 };
+  const LINE_HALF_LENGTH = 400;
+  const WIN_TOLERANCE = 5; // within 5 points of a 50/50 split counts as a win
+
+  let PUZZLE = HALVES_PUZZLES[0];
+  let vertices = [];
+  let angleDeg = 0;   // 0-359, matches standard atan2 convention (0 = pointing right)
+  let offsetX = 0;    // -90..90, added to CENTER.x
+  let offsetY = 0;    // -90..90, added to CENTER.y
+  let gameOver = false;
+  let readOnly = false;
+  let dragging = false;
+  let listenersBound = false;
+
+  const bannerEl = document.getElementById('halves-played-banner');
+  const bannerSummaryEl = document.getElementById('halves-played-summary');
+  const shapeWrapEl = document.getElementById('halves-shape-wrap');
+  const controlsEl = document.getElementById('halves-controls');
+  const dialEl = document.getElementById('halves-dial');
+  const dialHandleEl = document.getElementById('halves-dial-handle');
+  const xSlider = document.getElementById('halves-x-slider');
+  const ySlider = document.getElementById('halves-y-slider');
+  const hintEl = document.getElementById('halves-hint');
+  const confirmBtn = document.getElementById('halves-confirm-btn');
+  const resultBox = document.getElementById('halves-result-box');
+  const resultSplitEl = document.getElementById('halves-result-split');
+  const modalEl = document.getElementById('halves-result-modal');
+  const resultTitle = document.getElementById('halves-result-title');
+  const resultText = document.getElementById('halves-result-text');
+  const instructionsBox = document.getElementById('halves-instructions-box');
+
+  function toPointObjs(raw){ return raw.map(p => ({ x: p[0], y: p[1] })); }
+
+  function polygonArea(pts){
+    let area = 0;
+    const n = pts.length;
+    for(let i = 0; i < n; i++){
+      const p1 = pts[i], p2 = pts[(i + 1) % n];
+      area += p1.x * p2.y - p2.x * p1.y;
+    }
+    return Math.abs(area) / 2;
+  }
+
+  // Clips the polygon by the infinite line through `center` at `angleRad`,
+  // returning the two resulting sub-polygons (Sutherland-Hodgman, single edge).
+  function clipPolygon(pts, center, angleRad){
+    const nx = -Math.sin(angleRad), ny = Math.cos(angleRad);
+    function side(p){ return (p.x - center.x) * nx + (p.y - center.y) * ny; }
+    let pos = [], neg = [];
+    const n = pts.length;
+    for(let i = 0; i < n; i++){
+      const curr = pts[i], next = pts[(i + 1) % n];
+      const sC = side(curr), sN = side(next);
+      if(sC >= 0) pos.push(curr);
+      if(sC <= 0) neg.push(curr);
+      if((sC > 0 && sN < 0) || (sC < 0 && sN > 0)){
+        const t = sC / (sC - sN);
+        const ix = curr.x + t * (next.x - curr.x), iy = curr.y + t * (next.y - curr.y);
+        pos.push({ x: ix, y: iy });
+        neg.push({ x: ix, y: iy });
+      }
+    }
+    return { pos, neg };
+  }
+
+  function currentCenter(){
+    return { x: CENTER.x + offsetX, y: CENTER.y + offsetY };
+  }
+
+  function cutLineEndpoints(){
+    const rad = angleDeg * Math.PI / 180;
+    const c = currentCenter();
+    return {
+      x1: c.x - LINE_HALF_LENGTH * Math.cos(rad), y1: c.y - LINE_HALF_LENGTH * Math.sin(rad),
+      x2: c.x + LINE_HALF_LENGTH * Math.cos(rad), y2: c.y + LINE_HALF_LENGTH * Math.sin(rad)
+    };
+  }
+
+  function polygonPointsAttr(pts){
+    return pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  }
+
+  function renderShape(){
+    const line = cutLineEndpoints();
+    shapeWrapEl.innerHTML = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">`
+      + `<polygon class="halves-shape-fill" points="${polygonPointsAttr(vertices)}"/>`
+      + `<line class="halves-cut-line" x1="${line.x1.toFixed(1)}" y1="${line.y1.toFixed(1)}" x2="${line.x2.toFixed(1)}" y2="${line.y2.toFixed(1)}"/>`
+      + `</svg>`;
+  }
+
+  function renderResultShape(pos, neg){
+    const line = cutLineEndpoints();
+    shapeWrapEl.innerHTML = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">`
+      + (pos.length >= 3 ? `<polygon class="halves-side-a" points="${polygonPointsAttr(pos)}"/>` : '')
+      + (neg.length >= 3 ? `<polygon class="halves-side-b" points="${polygonPointsAttr(neg)}"/>` : '')
+      + `<polygon class="halves-shape-fill" points="${polygonPointsAttr(vertices)}" fill="none"/>`
+      + `<line class="halves-cut-line locked" x1="${line.x1.toFixed(1)}" y1="${line.y1.toFixed(1)}" x2="${line.x2.toFixed(1)}" y2="${line.y2.toFixed(1)}"/>`
+      + `</svg>`;
+  }
+
+  function renderDialHandle(){
+    const rad = angleDeg * Math.PI / 180;
+    const R = 40; // px, radius within the 96px dial
+    const dx = R * Math.cos(rad), dy = R * Math.sin(rad);
+    dialHandleEl.style.left = `calc(50% + ${dx}px)`;
+    dialHandleEl.style.top = `calc(50% + ${dy}px)`;
+  }
+
+  function updateFromDial(clientX, clientY){
+    const rect = dialEl.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    const dx = clientX - cx, dy = clientY - cy;
+    let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+    if(deg < 0) deg += 360;
+    angleDeg = deg;
+    renderDialHandle();
+    renderShape();
+  }
+
+  function shakeInputVisual(el){
+    el.classList.remove('invalid');
+    void el.offsetWidth;
+    el.classList.add('invalid');
+  }
+
+  function confirmCut(){
+    if(gameOver || readOnly) return;
+    const rad = angleDeg * Math.PI / 180;
+    const { pos, neg } = clipPolygon(vertices, currentCenter(), rad);
+    const areaPos = pos.length >= 3 ? polygonArea(pos) : 0;
+    const areaNeg = neg.length >= 3 ? polygonArea(neg) : 0;
+    const total = areaPos + areaNeg;
+
+    if(total <= 0 || pos.length < 3 || neg.length < 3){
+      // the line missed the shape entirely (e.g. dragged fully off it) — not a valid cut
+      hintEl.textContent = "That line doesn't cross the shape. Adjust it and try again.";
+      shakeInputVisual(dialEl);
+      return;
+    }
+
+    const pctA = (areaPos / total) * 100;
+    const pctB = 100 - pctA;
+    const smaller = Math.min(pctA, pctB);
+    const larger = Math.max(pctA, pctB);
+    const won = (50 - smaller) <= WIN_TOLERANCE;
+
+    endGame(won, smaller, larger, pos, neg);
+  }
+
+  // Eases 0 -> target for both percentages over `duration` ms, updating the
+  // on-screen numbers every frame, then calls `onDone` once it settles.
+  function animateSplitCountUp(largerPct, smallerPct, duration, onDone){
+    const start = performance.now();
+    function tick(now){
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out — fast start, settles at the end
+      const curLarger = largerPct * eased;
+      const curSmaller = smallerPct * eased;
+      resultSplitEl.textContent = `${curLarger.toFixed(1)}% / ${curSmaller.toFixed(1)}%`;
+      if(t < 1){
+        requestAnimationFrame(tick);
+      } else {
+        resultSplitEl.textContent = `${largerPct.toFixed(1)}% / ${smallerPct.toFixed(1)}%`;
+        onDone();
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function endGame(won, smallerPct, largerPct, pos, neg){
+    gameOver = true;
+    controlsEl.style.pointerEvents = 'none';
+    controlsEl.style.opacity = '0.5';
+    confirmBtn.disabled = true;
+    hintEl.textContent = '';
+
+    renderResultShape(pos, neg);
+
+    const splitLabel = `${largerPct.toFixed(1)}% / ${smallerPct.toFixed(1)}%`;
+    resultBox.hidden = false;
+    resultSplitEl.textContent = '0.0% / 0.0%';
+
+    // build a little suspense: count the numbers up first, pause, then reveal the verdict
+    animateSplitCountUp(largerPct, smallerPct, 1200, () => {
+      setTimeout(() => {
+        modalEl.hidden = false;
+        let summary;
+        if(won){
+          resultTitle.textContent = "Nice cut!";
+          summary = `Your cut split the shape ${splitLabel} \u2014 close enough to call it even.`;
+        } else {
+          resultTitle.textContent = "Not quite even";
+          summary = `Your cut split the shape ${splitLabel} \u2014 not close enough to 50/50.`;
+        }
+        resultText.textContent = summary;
+        window.PuzlDaily.setState('halves', { won, summary, angleDeg, offsetX, offsetY, smallerPct, largerPct });
+      }, 1000);
+    });
+  }
+
+  // Starts the cut line horizontal and pushed above the shape entirely (no
+  // overlap at all), so the player has to deliberately bring it down and
+  // aim it themselves rather than starting with a near-answer for free.
+  function resetControls(){
+    angleDeg = 0;
+    offsetX = 0;
+    offsetY = -125;
+    xSlider.value = 0;
+    ySlider.value = -125;
+    renderDialHandle();
+  }
+
+  function init(){
+    bindListenersOnce();
+    PUZZLE = HALVES_PUZZLES[window.PuzlDaily.dayIndex(HALVES_PUZZLES.length)];
+    vertices = toPointObjs(PUZZLE.vertices);
+    modalEl.hidden = true;
+    resultBox.hidden = true;
+    hintEl.textContent = "The cut line starts above the shape — drag it down and line it up yourself, then confirm. Just one try.";
+
+    const state = window.PuzlDaily.getState('halves');
+    readOnly = !!state;
+
+    if(readOnly){
+      angleDeg = typeof state.angleDeg === 'number' ? state.angleDeg : 0;
+      offsetX = typeof state.offsetX === 'number' ? state.offsetX : 0;
+      offsetY = typeof state.offsetY === 'number' ? state.offsetY : 0;
+      xSlider.value = offsetX;
+      ySlider.value = offsetY;
+      xSlider.disabled = true;
+      ySlider.disabled = true;
+      renderDialHandle();
+      gameOver = true;
+      controlsEl.style.pointerEvents = 'none';
+      controlsEl.style.opacity = '0.5';
+      confirmBtn.disabled = true;
+      hintEl.textContent = '';
+
+      const rad = angleDeg * Math.PI / 180;
+      const { pos, neg } = clipPolygon(vertices, currentCenter(), rad);
+      renderResultShape(pos, neg);
+      if(typeof state.smallerPct === 'number'){
+        resultBox.hidden = false;
+        resultSplitEl.textContent = `${state.largerPct.toFixed(1)}% / ${state.smallerPct.toFixed(1)}%`;
+      }
+      bannerEl.hidden = false;
+      bannerSummaryEl.textContent = state.summary || '';
+    } else {
+      resetControls();
+      xSlider.disabled = false;
+      ySlider.disabled = false;
+      gameOver = false;
+      controlsEl.style.pointerEvents = '';
+      controlsEl.style.opacity = '';
+      confirmBtn.disabled = false;
+      renderShape();
+      bannerEl.hidden = true;
+    }
+  }
+
+  function bindListenersOnce(){
+    if(listenersBound) return;
+    listenersBound = true;
+
+    dialEl.addEventListener('pointerdown', e => {
+      if(gameOver || readOnly) return;
+      dragging = true;
+      dialEl.setPointerCapture(e.pointerId);
+      updateFromDial(e.clientX, e.clientY);
+    });
+    dialEl.addEventListener('pointermove', e => { if(dragging) updateFromDial(e.clientX, e.clientY); });
+    dialEl.addEventListener('pointerup', () => { dragging = false; });
+    dialEl.addEventListener('pointercancel', () => { dragging = false; });
+
+    xSlider.addEventListener('input', () => { offsetX = Number(xSlider.value); renderShape(); });
+    ySlider.addEventListener('input', () => { offsetY = Number(ySlider.value); renderShape(); });
+
+    confirmBtn.addEventListener('click', confirmCut);
+
+    document.getElementById('halves-info-btn').addEventListener('click', () => {
       instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
     });
   }
