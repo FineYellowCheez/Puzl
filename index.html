@@ -95,6 +95,14 @@
   --halves-dark: #7D1D54;
   --halves-tint: #F7E3EE;
 
+  --glimpse:      #2571C4;
+  --glimpse-dark: #1B5494;
+  --glimpse-tint: #E3EEFA;
+
+  --mosaic:      #D98E04;
+  --mosaic-dark: #A66C03;
+  --mosaic-tint: #FCEFD9;
+
   --danger:     #E8503D;
   --danger-tint:#FDE7E4;
   --success:    #1FA971;
@@ -1041,6 +1049,119 @@ html[data-layout="grid"] .game-chevron{ display:none; }
   letter-spacing:0.6px; color:var(--halves-dark); margin-bottom:6px;
 }
 .halves-result-box .split-text{ font-weight:700; color:var(--ink); font-size:16px; line-height:1.4; }
+
+/* =========================================================
+   GLIMPSE
+   ========================================================= */
+
+.glimpse-blanks{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin:10px 0 22px; }
+.glimpse-letter-tile{
+  width:36px; height:44px; border-radius:8px; border:2px solid var(--line); background:var(--surface);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'IBM Plex Mono', monospace; font-weight:700; font-size:18px; color:var(--ink-faint);
+  transition:border-color 0.2s ease, background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+.glimpse-letter-tile.revealed{
+  border-color:var(--glimpse); background:var(--glimpse-tint); color:var(--glimpse-dark); transform:translateY(-2px);
+}
+
+.glimpse-bars{ display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
+.glimpse-bar-label{
+  display:flex; justify-content:space-between; font-family:'IBM Plex Mono', monospace;
+  font-size:11px; text-transform:uppercase; letter-spacing:0.6px; color:var(--ink-soft); margin-bottom:5px;
+}
+.glimpse-bar-label strong{ color:var(--ink); }
+.glimpse-bar-track{ height:10px; border-radius:999px; background:var(--line); overflow:hidden; }
+.glimpse-bar-fill{ height:100%; border-radius:999px; transition:width 0.25s ease; }
+.glimpse-bar-fill.hints{ background:var(--glimpse); }
+.glimpse-bar-fill.score{ background:var(--success); }
+
+.glimpse-actions-row{ display:flex; gap:10px; justify-content:center; margin-bottom:14px; }
+.glimpse-hint-btn{
+  padding:12px 22px; border-radius:999px; font-weight:700; font-size:14.5px;
+  background:var(--surface); border:2px solid var(--glimpse); color:var(--glimpse-dark);
+}
+.glimpse-hint-btn:hover:not(:disabled){ background:var(--glimpse-tint); }
+.glimpse-hint-btn:disabled{ opacity:0.45; cursor:default; }
+.glimpse-guess-btn{ padding:12px 22px; border-radius:999px; font-weight:700; font-size:14.5px; background:var(--glimpse); color:#fff; }
+.glimpse-guess-btn:hover:not(:disabled){ background:var(--glimpse-dark); }
+.glimpse-guess-btn:disabled{ opacity:0.45; cursor:default; }
+
+.glimpse-guess-panel{ display:flex; gap:8px; margin-bottom:14px; }
+.glimpse-guess-input{
+  flex:1 1 auto; padding:12px 16px; border-radius:999px; border:2px solid var(--glimpse);
+  font-size:15px; text-transform:uppercase; background:var(--surface); color:var(--ink);
+}
+.glimpse-guess-input:focus{ outline:none; border-color:var(--glimpse-dark); }
+.glimpse-guess-input.invalid{ border-color:var(--danger); animation:input-shake 0.4s ease; }
+.glimpse-guess-submit{
+  flex:0 0 auto; width:46px; height:46px; border-radius:50%; background:var(--glimpse); color:#fff;
+  font-size:18px; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-sm);
+}
+.glimpse-guess-submit:hover{ background:var(--glimpse-dark); }
+.glimpse-guess-back{
+  flex:0 0 auto; width:46px; height:46px; border-radius:50%; background:var(--bg);
+  border:1px solid var(--line); color:var(--ink-soft); font-size:16px;
+  display:flex; align-items:center; justify-content:center;
+}
+.glimpse-guess-back:hover{ background:var(--surface); }
+
+.glimpse-feedback{ text-align:center; font-size:13px; color:var(--ink-soft); min-height:18px; margin-bottom:6px; }
+.glimpse-feedback.bad{ color:var(--danger); font-weight:600; }
+
+/* =========================================================
+   MOSAIC
+   ========================================================= */
+
+.mosaic-canvas-wrap{ display:flex; justify-content:center; margin:10px 0 16px; }
+.mosaic-canvas-wrap svg{
+  width:100%; max-width:340px; height:auto; border-radius:var(--radius-md);
+  border:2px solid var(--line); background:var(--surface); display:block;
+}
+
+.mosaic-progress{ text-align:center; font-size:13px; color:var(--ink-soft); margin-bottom:14px; }
+.mosaic-progress strong{ color:var(--mosaic-dark); }
+
+.mosaic-hint-row{ display:flex; justify-content:center; margin-bottom:18px; }
+.mosaic-hint-btn{
+  padding:11px 24px; border-radius:999px; background:var(--mosaic); color:#fff; font-weight:700; font-size:14px;
+}
+.mosaic-hint-btn:hover:not(:disabled){ background:var(--mosaic-dark); }
+.mosaic-hint-btn:disabled{ opacity:0.45; cursor:default; }
+
+.mosaic-tray-label{
+  font-family:'IBM Plex Mono', monospace; font-size:11px; text-transform:uppercase;
+  letter-spacing:0.6px; color:var(--ink-faint); margin:0 2px 10px; text-align:center;
+}
+.mosaic-tray{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:14px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-lg);
+  margin-top:auto; max-height:220px; overflow-y:auto;
+}
+.mosaic-tray-piece{
+  width:44px; height:44px; cursor:grab; touch-action:none; border-radius:6px; position:relative; flex:0 0 auto;
+}
+.mosaic-tray-piece svg{ width:100%; height:100%; display:block; }
+.mosaic-tray-piece.dragging{ opacity:0.3; }
+.mosaic-tray-empty{ color:var(--ink-faint); font-size:13px; padding:10px; }
+
+@keyframes mosaic-hint-glow{
+  0%{ box-shadow:0 0 0 0 rgba(255,196,0,0); }
+  20%{ box-shadow:0 0 0 5px rgba(255,196,0,0.85); }
+  100%{ box-shadow:0 0 18px 9px rgba(255,196,0,0); }
+}
+.mosaic-tray-piece.hint-pulse{ animation:mosaic-hint-glow 1s ease-out; border-radius:8px; }
+
+@keyframes mosaic-target-pulse{
+  0%{ opacity:0; } 15%{ opacity:1; } 50%{ opacity:0.35; } 85%{ opacity:1; } 100%{ opacity:0; }
+}
+.mosaic-target-outline{
+  fill:rgba(255,196,0,0.22); stroke:#FFC400; stroke-width:2.5; stroke-dasharray:5 4;
+  animation:mosaic-target-pulse 1.4s ease-in-out; pointer-events:none;
+}
+
+.mosaic-drag-clone{ position:fixed; pointer-events:none; z-index:60; width:56px; height:56px; }
+.mosaic-drag-clone svg{ width:100%; height:100%; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.35)); }
 </style>
 </head>
 <body>
@@ -1313,6 +1434,25 @@ html[data-layout="grid"] .game-chevron{ display:none; }
             <div class="game-name">Halves</div>
             <div class="game-phrase">Cut the irregular shape as close to half as possible.</div>
             <span class="game-badge" id="badge-halves" data-category="Logic">Logic</span>
+          </div>
+          <div class="game-chevron">&rsaquo;</div>
+        </button>
+      </li>
+      <li>
+        <button class="game-card" data-preview="glimpse">
+          <div class="game-icon">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+              <rect width="48" height="48" fill="var(--glimpse)"/>
+              <rect x="7" y="17" width="10" height="14" rx="2" fill="#fff"/>
+              <text x="12" y="28" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="11" fill="var(--glimpse)" text-anchor="middle">G</text>
+              <rect x="19" y="17" width="10" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
+              <rect x="31" y="17" width="10" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
+            </svg>
+          </div>
+          <div class="game-info">
+            <div class="game-name">Glimpse</div>
+            <div class="game-phrase">Guess the mystery word before too many letters are revealed.</div>
+            <span class="game-badge" id="badge-glimpse" data-category="Wordplay">Wordplay</span>
           </div>
           <div class="game-chevron">&rsaquo;</div>
         </button>
@@ -2288,6 +2428,79 @@ html[data-layout="grid"] .game-chevron{ display:none; }
   </div>
 </section>
 
+<!-- =========================================================
+     GLIMPSE VIEW
+     ========================================================= -->
+<section class="view" id="view-glimpse">
+  <div class="game-page">
+    <div class="game-topbar">
+      <button class="back-link" data-route="home" aria-label="Back to home">&larr;</button>
+      <div class="game-title-block">
+        <div class="game-title-icon">
+          <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+            <rect width="48" height="48" fill="var(--glimpse)"/>
+            <rect x="7" y="17" width="10" height="14" rx="2" fill="#fff"/>
+            <text x="12" y="28" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="11" fill="var(--glimpse)" text-anchor="middle">G</text>
+            <rect x="19" y="17" width="10" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
+            <rect x="31" y="17" width="10" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 3"/>
+          </svg>
+        </div>
+        <div class="game-title-text">
+          <h1>Glimpse</h1>
+          <p>Guess the mystery word before too many letters are revealed.</p>
+        </div>
+      </div>
+      <button class="info-btn" id="glimpse-info-btn" aria-label="Show instructions">i</button>
+    </div>
+
+    <div class="instructions-box" id="glimpse-instructions-box">
+      <strong>How to play:</strong> A mystery word is shown as a row of blanks, with one random letter already given for free. Press "Hint" to reveal one more random letter — but every hint lowers your score by one point, and your starting score equals the word's length. Press "Guess" to open a text box and type the whole word, or press the back arrow next to it to close the box without spending your guess. You only get <strong>one guess total</strong>, so only submit it when you're sure. Guess right before you run out of hints (or nerve) for the best score. One word per day — a new one arrives at midnight.
+    </div>
+
+    <div id="glimpse-playarea">
+      <div class="played-banner" id="glimpse-played-banner" style="border-left-color:var(--glimpse)" hidden>
+        <strong>You already played today's Glimpse.</strong> <span id="glimpse-played-summary"></span> A new word unlocks at midnight — this board is just for looking.
+      </div>
+
+      <div class="glimpse-blanks" id="glimpse-blanks"></div>
+
+      <div class="glimpse-bars">
+        <div>
+          <div class="glimpse-bar-label"><span>Hints Used</span><span><strong id="glimpse-hints-text">0</strong> / <span id="glimpse-hints-max">0</span></span></div>
+          <div class="glimpse-bar-track"><div class="glimpse-bar-fill hints" id="glimpse-hints-fill" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="glimpse-bar-label"><span>Current Score</span><span><strong id="glimpse-score-text">0</strong> / <span id="glimpse-score-max">0</span></span></div>
+          <div class="glimpse-bar-track"><div class="glimpse-bar-fill score" id="glimpse-score-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+
+      <div class="glimpse-actions-row" id="glimpse-actions-row">
+        <button class="glimpse-hint-btn" id="glimpse-hint-btn">Hint</button>
+        <button class="glimpse-guess-btn" id="glimpse-guess-btn">Guess</button>
+      </div>
+
+      <div class="glimpse-guess-panel" id="glimpse-guess-panel" hidden>
+        <input type="text" class="glimpse-guess-input" id="glimpse-guess-input" placeholder="Type the word&hellip;" autocomplete="off" spellcheck="false" maxlength="30">
+        <button class="glimpse-guess-submit" id="glimpse-guess-submit" aria-label="Submit guess">&rarr;</button>
+        <button class="glimpse-guess-back" id="glimpse-guess-back" aria-label="Close without guessing">&larr;</button>
+      </div>
+
+      <p class="glimpse-feedback" id="glimpse-feedback"></p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="glimpse-result-modal" hidden>
+    <div class="modal-card">
+      <h2 id="glimpse-result-title">Got it!</h2>
+      <p id="glimpse-result-text">You guessed the mystery word.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-route="home">Back home</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <script>
 /* =========================================================
    PUZL DAILY — shared date/rotation/progress utilities.
@@ -2439,7 +2652,7 @@ window.PuzlPrefs = (function(){
    Uses the URL hash so the browser back button works too.
    ========================================================= */
 (function(){
-  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor-easy', 'fearfactor-medium', 'fearfactor-expert', 'tessellate', 'chopsticks', 'halves'];
+  const VALID = ['home', 'vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor-easy', 'fearfactor-medium', 'fearfactor-expert', 'tessellate', 'chopsticks', 'halves', 'glimpse'];
 
   function showView(name){
     // Fear Factor has 3 difficulties that all share one view section;
@@ -2466,6 +2679,7 @@ window.PuzlPrefs = (function(){
     if(name === 'tessellate' && window.TessellateGame) window.TessellateGame.init();
     if(name === 'chopsticks' && window.ChopsticksGame) window.ChopsticksGame.init();
     if(name === 'halves' && window.HalvesGame) window.HalvesGame.init();
+    if(name === 'glimpse' && window.GlimpseGame) window.GlimpseGame.init();
   }
 
   function routeFromHash(){
@@ -2629,7 +2843,7 @@ window.PuzlPrefs = (function(){
    today's puzzle has already been played.
    ========================================================= */
 window.PuzlHome = (function(){
-  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor', 'tessellate', 'chopsticks', 'halves'];
+  const GAME_IDS = ['vennagain', 'deconstruct', 'linkchain', 'vowelplay', 'splice', 'chroma', 'mohs', 'letterwise', 'origami', 'rulebook', 'fearfactor', 'tessellate', 'chopsticks', 'halves', 'glimpse'];
 
   function refresh(){
     GAME_IDS.forEach(id => {
@@ -5818,6 +6032,221 @@ window.HalvesGame = (function(){
     confirmBtn.addEventListener('click', confirmCut);
 
     document.getElementById('halves-info-btn').addEventListener('click', () => {
+      instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
+    });
+  }
+
+  return { init };
+})();
+</script>
+
+<script>
+/* =========================================================
+   GLIMPSE — game logic
+   GLIMPSE_PUZZLES holds the full rotation; today's word is
+   picked by PuzlDaily.dayIndex(). One letter is revealed for
+   free at the start (not counted against the hint budget); each
+   hint after that reveals one more random blank and costs a
+   point. There's exactly one guess, submitted through a
+   collapsible panel that can be freely opened/closed via the
+   Guess/Back buttons without spending anything.
+   ========================================================= */
+window.GlimpseGame = (function(){
+  const GLIMPSE_PUZZLES = [
+    { word: "RIVER" },
+    { word: "GALAXY" },
+    { word: "WHISPER" },
+    { word: "ELEPHANT" },
+    { word: "PUZZLE" }
+  ];
+
+  let PUZZLE = GLIMPSE_PUZZLES[0];
+  let word = '';
+  let revealed = [];
+  let maxHints = 0;
+  let maxScore = 0;
+  let hintsUsed = 0;
+  let score = 0;
+  let gameOver = false;
+  let readOnly = false;
+  let listenersBound = false;
+
+  const bannerEl = document.getElementById('glimpse-played-banner');
+  const bannerSummaryEl = document.getElementById('glimpse-played-summary');
+  const blanksEl = document.getElementById('glimpse-blanks');
+  const hintsTextEl = document.getElementById('glimpse-hints-text');
+  const hintsMaxEl = document.getElementById('glimpse-hints-max');
+  const hintsFillEl = document.getElementById('glimpse-hints-fill');
+  const scoreTextEl = document.getElementById('glimpse-score-text');
+  const scoreMaxEl = document.getElementById('glimpse-score-max');
+  const scoreFillEl = document.getElementById('glimpse-score-fill');
+  const hintBtn = document.getElementById('glimpse-hint-btn');
+  const guessBtn = document.getElementById('glimpse-guess-btn');
+  const guessPanel = document.getElementById('glimpse-guess-panel');
+  const guessInput = document.getElementById('glimpse-guess-input');
+  const guessSubmitBtn = document.getElementById('glimpse-guess-submit');
+  const guessBackBtn = document.getElementById('glimpse-guess-back');
+  const feedbackEl = document.getElementById('glimpse-feedback');
+  const modalEl = document.getElementById('glimpse-result-modal');
+  const resultTitle = document.getElementById('glimpse-result-title');
+  const resultText = document.getElementById('glimpse-result-text');
+  const instructionsBox = document.getElementById('glimpse-instructions-box');
+
+  function renderBlanks(){
+    blanksEl.innerHTML = '';
+    for(let i = 0; i < word.length; i++){
+      const tile = document.createElement('div');
+      tile.className = 'glimpse-letter-tile' + (revealed[i] ? ' revealed' : '');
+      tile.textContent = revealed[i] ? word[i] : '_';
+      blanksEl.appendChild(tile);
+    }
+  }
+
+  function renderBars(){
+    hintsTextEl.textContent = hintsUsed;
+    hintsMaxEl.textContent = maxHints;
+    hintsFillEl.style.width = (maxHints > 0 ? (hintsUsed / maxHints) * 100 : 0) + '%';
+
+    scoreTextEl.textContent = score;
+    scoreMaxEl.textContent = maxScore;
+    scoreFillEl.style.width = (maxScore > 0 ? (score / maxScore) * 100 : 0) + '%';
+  }
+
+  function blankIndices(){
+    const out = [];
+    for(let i = 0; i < word.length; i++) if(!revealed[i]) out.push(i);
+    return out;
+  }
+
+  function updateHintButtonState(){
+    const noBlanksLeft = blankIndices().length === 0;
+    hintBtn.disabled = gameOver || readOnly || hintsUsed >= maxHints || noBlanksLeft;
+  }
+
+  function showFeedback(msg, type){
+    feedbackEl.textContent = msg;
+    feedbackEl.className = 'glimpse-feedback' + (type ? ' ' + type : '');
+  }
+
+  function useHint(){
+    if(gameOver || readOnly) return;
+    if(hintsUsed >= maxHints) return;
+    const blanks = blankIndices();
+    if(blanks.length === 0) return;
+
+    const idx = blanks[Math.floor(Math.random() * blanks.length)];
+    revealed[idx] = true;
+    hintsUsed++;
+    score--;
+    renderBlanks();
+    renderBars();
+    updateHintButtonState();
+  }
+
+  function openGuessPanel(){
+    if(gameOver || readOnly) return;
+    guessPanel.hidden = false;
+    guessInput.focus();
+  }
+
+  function closeGuessPanel(){
+    guessPanel.hidden = true;
+  }
+
+  function shakeInput(){
+    guessInput.classList.remove('invalid');
+    void guessInput.offsetWidth;
+    guessInput.classList.add('invalid');
+  }
+
+  function submitGuess(){
+    if(gameOver || readOnly) return;
+    const raw = guessInput.value.trim();
+    if(!raw){ shakeInput(); return; }
+
+    const won = raw.toUpperCase() === word;
+    endGame(won, raw);
+  }
+
+  function revealFullWord(){
+    for(let i = 0; i < word.length; i++) revealed[i] = true;
+    renderBlanks();
+  }
+
+  function endGame(won, guessText){
+    gameOver = true;
+    closeGuessPanel();
+    revealFullWord();
+    hintBtn.disabled = true;
+    guessBtn.disabled = true;
+    showFeedback('', '');
+
+    modalEl.hidden = false;
+    let summary;
+    if(won){
+      resultTitle.textContent = "Got it!";
+      summary = `You guessed "${word}" correctly with a score of ${score} out of ${maxScore}.`;
+    } else {
+      resultTitle.textContent = "Not quite";
+      summary = `The mystery word was "${word}." Your guess: "${guessText}."`;
+    }
+    resultText.textContent = summary;
+    window.PuzlDaily.setState('glimpse', { won, summary, hintsUsed, score });
+  }
+
+  function init(){
+    bindListenersOnce();
+    PUZZLE = GLIMPSE_PUZZLES[window.PuzlDaily.dayIndex(GLIMPSE_PUZZLES.length)];
+    word = PUZZLE.word.toUpperCase();
+    maxHints = word.length;
+    maxScore = word.length;
+    modalEl.hidden = true;
+    guessPanel.hidden = true;
+    guessInput.value = '';
+    showFeedback('', '');
+
+    const state = window.PuzlDaily.getState('glimpse');
+    readOnly = !!state;
+
+    if(readOnly){
+      hintsUsed = state.hintsUsed || 0;
+      score = typeof state.score === 'number' ? state.score : maxScore;
+      gameOver = true;
+      revealed = word.split('').map(() => true);
+      renderBlanks();
+      renderBars();
+      hintBtn.disabled = true;
+      guessBtn.disabled = true;
+      bannerEl.hidden = false;
+      bannerSummaryEl.textContent = state.summary || '';
+    } else {
+      hintsUsed = 0;
+      score = maxScore;
+      gameOver = false;
+      revealed = word.split('').map(() => false);
+      // one free letter, revealed at random, doesn't count against the hint budget
+      const freeIndex = Math.floor(Math.random() * word.length);
+      revealed[freeIndex] = true;
+      renderBlanks();
+      renderBars();
+      hintBtn.disabled = false;
+      guessBtn.disabled = false;
+      updateHintButtonState();
+      bannerEl.hidden = true;
+    }
+  }
+
+  function bindListenersOnce(){
+    if(listenersBound) return;
+    listenersBound = true;
+
+    hintBtn.addEventListener('click', useHint);
+    guessBtn.addEventListener('click', openGuessPanel);
+    guessBackBtn.addEventListener('click', closeGuessPanel);
+    guessSubmitBtn.addEventListener('click', submitGuess);
+    guessInput.addEventListener('keydown', e => { if(e.key === 'Enter') submitGuess(); });
+
+    document.getElementById('glimpse-info-btn').addEventListener('click', () => {
       instructionsBox.style.display = instructionsBox.style.display === 'none' ? 'block' : 'none';
     });
   }
